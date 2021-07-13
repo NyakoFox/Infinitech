@@ -5,9 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
   ],
-  "client": [
-    "ExampleMixin"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }
