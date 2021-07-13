@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "infinitech:block/conveyor_belt" }
+    "facing=north": { "model": "infinitech:block/conveyor_belt" },
+    "facing=east":  { "model": "infinitech:block/conveyor_belt", "y":  90},
+    "facing=south": { "model": "infinitech:block/conveyor_belt", "y": 180},
+    "facing=west":  { "model": "infinitech:block/conveyor_belt", "y": 270},
   }
 }
