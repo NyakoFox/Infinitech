@@ -1,25 +1,37 @@
 package gay.nyako.infinitech;
 
 import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Hand;
 import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 
 import java.util.stream.Stream;
 
-public class ConveyorBeltBlock extends Block {
+public class ConveyorBeltBlock extends Block implements BlockEntityProvider {
 
     public ConveyorBeltBlock(Settings settings) {
         super(settings);
         setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new ConveyorBeltBlockEntity(pos, state);
     }
 
     @Override
@@ -29,6 +41,7 @@ public class ConveyorBeltBlock extends Block {
 
     // idk if we need this ,,
     @Override
+    @SuppressWarnings("deprecation")
     public BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
@@ -52,17 +65,57 @@ public class ConveyorBeltBlock extends Block {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public BlockState rotate(BlockState state, BlockRotation rotation) {
         return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state.get(Properties.HORIZONTAL_FACING)));
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public BlockState mirror(BlockState state, BlockMirror mirror) {
         return state.rotate(mirror.getRotation(state.get(Properties.HORIZONTAL_FACING)));
     }
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext context) {
-        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing().getOpposite());
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing());
+    }
+
+    @Override
+    public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
+        if (world.isClient) return ActionResult.SUCCESS;
+        Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
+
+        if (!player.getStackInHand(hand).isEmpty()) {
+            // Check what is the first open slot and put an item from the player's hand there
+            if (blockEntity.getStack(0).isEmpty()) {
+                // Put the stack the player is holding into the inventory
+                blockEntity.setStack(0, player.getStackInHand(hand).copy());
+                // Remove the stack from the player's hand
+                player.getStackInHand(hand).setCount(0);
+            } else if (blockEntity.getStack(1).isEmpty()) {
+                blockEntity.setStack(1, player.getStackInHand(hand).copy());
+                player.getStackInHand(hand).setCount(0);
+            } else {
+                // If the inventory is full we'll print it's contents
+                System.out.println("The first slot holds "
+                        + blockEntity.getStack(0) + " and the second slot holds " + blockEntity.getStack(1));
+            }
+        } else {
+            // If the player is not holding anything we'll get give him the items in the block entity one by one
+
+            // Find the first slot that has an item and give it to the player
+            if (!blockEntity.getStack(1).isEmpty()) {
+                // Give the player the stack in the inventory
+                player.getInventory().offerOrDrop(blockEntity.getStack(1));
+                // Remove the stack from the inventory
+                blockEntity.removeStack(1);
+            } else if (!blockEntity.getStack(0).isEmpty()) {
+                player.getInventory().offerOrDrop(blockEntity.getStack(0));
+                blockEntity.removeStack(0);
+            }
+        }
+
+        return ActionResult.SUCCESS;
     }
 }

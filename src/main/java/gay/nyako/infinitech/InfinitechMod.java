@@ -3,9 +3,11 @@ package gay.nyako.infinitech;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
@@ -19,11 +21,15 @@ public class InfinitechMod implements ModInitializer {
 															  			  .breakByTool(FabricToolTags.PICKAXES, 1)
 																		 );
 
+	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
+
 	@Override
 	public void onInitialize() { // modid is "infinitech"
 		System.out.println("hi from infinitech!!");
 
 		Registry.register(Registry.BLOCK, new Identifier("infinitech", "conveyor_belt"), CONVEYOR_BELT_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier("infinitech", "conveyor_belt"), new BlockItem(CONVEYOR_BELT_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+
+		CONVEYOR_BELT_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "infinitech:conveyor_belt_entity", FabricBlockEntityTypeBuilder.create(ConveyorBeltBlockEntity::new, CONVEYOR_BELT_BLOCK).build(null));
 	}
 }

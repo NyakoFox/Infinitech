@@ -22,6 +22,9 @@
   "entrypoints": {
     "main": [
       "gay.nyako.infinitech.InfinitechMod"
+    ],
+    "client": [
+      "gay.nyako.infinitech.InfinitechModClient"
     ]
   },
   "mixins": [
