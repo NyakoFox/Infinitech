@@ -115,6 +115,7 @@ public class ConveyorBeltBlock extends Block implements BlockEntityProvider {
                 blockEntity.removeStack(0);
             }
         }
+        blockEntity.markDirty();
 
         return ActionResult.SUCCESS;
     }
