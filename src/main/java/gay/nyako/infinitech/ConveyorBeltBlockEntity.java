@@ -8,12 +8,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityClientSerializable, ImplementedInventory {
-    private final DefaultedList<ItemStack> items = DefaultedList.ofSize(2, ItemStack.EMPTY);
+    private final DefaultedList<ItemStack> items = DefaultedList.ofSize(1, ItemStack.EMPTY);
+    public static float progress = 0f;
 
     public ConveyorBeltBlockEntity(BlockPos pos, BlockState state) {
         super(InfinitechMod.CONVEYOR_BELT_BLOCK_ENTITY, pos, state);
+    }
+
+    public static void tick(World world, BlockPos pos, BlockState state, ConveyorBeltBlockEntity be) {
+        if (!world.isClient()) {
+            progress += 0.005f;
+            if (progress >= 1f) {
+                progress = 0.0f;
+            }
+        }
     }
 
     @Override

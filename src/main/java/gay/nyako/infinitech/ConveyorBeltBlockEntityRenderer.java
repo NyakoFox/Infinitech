@@ -29,7 +29,7 @@ public class ConveyorBeltBlockEntityRenderer implements BlockEntityRenderer<Conv
         if (!stack.isEmpty()) {
             // Move the item
 
-            float offset = 0.25f;
+            float offset = 0.25f + blockEntity.progress;
 
             switch (dir) {
                 case NORTH:

@@ -2,6 +2,8 @@ package gay.nyako.infinitech;
 
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
@@ -22,11 +24,16 @@ import net.minecraft.world.World;
 
 import java.util.stream.Stream;
 
-public class ConveyorBeltBlock extends Block implements BlockEntityProvider {
+public class ConveyorBeltBlock extends BlockWithEntity {
 
     public ConveyorBeltBlock(Settings settings) {
         super(settings);
         setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return checkType(type, InfinitechMod.CONVEYOR_BELT_BLOCK_ENTITY, ConveyorBeltBlockEntity::tick);
     }
 
     @Override
@@ -87,30 +94,22 @@ public class ConveyorBeltBlock extends Block implements BlockEntityProvider {
         Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
 
         if (!player.getStackInHand(hand).isEmpty()) {
-            // Check what is the first open slot and put an item from the player's hand there
+            // Put an item from the player's hand in
             if (blockEntity.getStack(0).isEmpty()) {
                 // Put the stack the player is holding into the inventory
                 blockEntity.setStack(0, player.getStackInHand(hand).copy());
                 // Remove the stack from the player's hand
                 player.getStackInHand(hand).setCount(0);
-            } else if (blockEntity.getStack(1).isEmpty()) {
-                blockEntity.setStack(1, player.getStackInHand(hand).copy());
-                player.getStackInHand(hand).setCount(0);
             } else {
                 // If the inventory is full we'll print it's contents
                 System.out.println("The first slot holds "
-                        + blockEntity.getStack(0) + " and the second slot holds " + blockEntity.getStack(1));
+                        + blockEntity.getStack(0));
             }
         } else {
-            // If the player is not holding anything we'll get give him the items in the block entity one by one
+            // If the player is not holding anything we'll get give them the item in the block entity
 
-            // Find the first slot that has an item and give it to the player
-            if (!blockEntity.getStack(1).isEmpty()) {
-                // Give the player the stack in the inventory
-                player.getInventory().offerOrDrop(blockEntity.getStack(1));
-                // Remove the stack from the inventory
-                blockEntity.removeStack(1);
-            } else if (!blockEntity.getStack(0).isEmpty()) {
+            // Give it to the player
+            if (!blockEntity.getStack(0).isEmpty()) {
                 player.getInventory().offerOrDrop(blockEntity.getStack(0));
                 blockEntity.removeStack(0);
             }
