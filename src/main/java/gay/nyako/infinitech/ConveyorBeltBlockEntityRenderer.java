@@ -9,6 +9,8 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3f;
 
 public class ConveyorBeltBlockEntityRenderer implements BlockEntityRenderer<ConveyorBeltBlockEntity> {
@@ -20,19 +22,39 @@ public class ConveyorBeltBlockEntityRenderer implements BlockEntityRenderer<Conv
     public void render(ConveyorBeltBlockEntity blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
 
+        Direction dir = blockEntity.getCachedState().get(Properties.HORIZONTAL_FACING);
+
         ItemStack stack = blockEntity.getStack(0);
 
-        // Calculate the current offset in the y value
-        double offset = Math.sin((blockEntity.getWorld().getTime() + tickDelta) / 8.0) / 4.0;
-        // Move the item
-        matrices.translate(0.5, 1.25 + offset, 0.5);
+        if (!stack.isEmpty()) {
+            // Move the item
 
-        // Rotate the item
-        matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion((blockEntity.getWorld().getTime() + tickDelta) * 4));
+            float offset = 0.25f;
 
-        int lightAbove = WorldRenderer.getLightmapCoordinates(blockEntity.getWorld(), blockEntity.getPos().up());
-        MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, lightAbove, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, 42);
+            switch (dir) {
+                case NORTH:
+                    matrices.translate(0.5, 0.125, 1 - offset);
+                    matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(0));
+                    break;
+                case SOUTH:
+                    matrices.translate(0.5, 0.125, 0 + offset);
+                    matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
+                    break;
+                case EAST:
+                    matrices.translate(0 + offset, 0.125, 0.5);
+                    matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(270));
+                    break;
+                case WEST:
+                    matrices.translate(1 - offset, 0.125, 0.5);
+                    matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(90));
+                    break;
+            }
 
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(90)); // on its side (please work)
+
+            int lightAbove = WorldRenderer.getLightmapCoordinates(blockEntity.getWorld(), blockEntity.getPos().up());
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, lightAbove, OverlayTexture.DEFAULT_UV, matrices, vertexConsumers, 42);
+        }
         // Mandatory call after GL calls
         matrices.pop();
     }
