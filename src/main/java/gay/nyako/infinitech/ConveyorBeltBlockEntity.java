@@ -8,8 +8,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
@@ -39,7 +37,7 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
         if (entity.progress >= 1f) {
             entity.progress = 1f;
             if (!world.isClient()) {
-                boolean succeeded = entity.Insert();
+                boolean succeeded = entity.insert();
                 if (succeeded) {
                     entity.progress = 0.0f;
                     entity.extract_cooldown = 10;
@@ -52,13 +50,13 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
         entity.extract_cooldown++;
         if (entity.extract_cooldown >= 10) {
             if (!world.isClient()) {
-                if (entity.getStack(0).isEmpty()) entity.Extract();
+                if (entity.getStack(0).isEmpty()) entity.extract();
             }
             entity.extract_cooldown = 0;
         }
     }
 
-    public void Extract() {
+    public void extract() {
         Direction dir = getCachedState().get(Properties.HORIZONTAL_FACING);
         if (world.getBlockEntity(pos.offset(dir.getOpposite())) instanceof ConveyorBeltBlockEntity) {
             return;
@@ -68,7 +66,7 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
         StorageUtil.move(back, storage , item -> true, 1, null);
     }
 
-    public boolean Insert() {
+    public boolean insert() {
         Direction dir = getCachedState().get(Properties.HORIZONTAL_FACING);
         Storage<ItemVariant> front = ItemStorage.SIDED.find(world, pos.offset(dir), dir.getOpposite());
 
