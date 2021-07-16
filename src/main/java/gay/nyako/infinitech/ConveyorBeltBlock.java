@@ -7,12 +7,10 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -88,33 +86,46 @@ public class ConveyorBeltBlock extends BlockWithEntity {
         return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing());
     }
 
+    //This method will drop all items onto the ground when the block is broken
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (state.getBlock() != newState.getBlock()) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof ConveyorBeltBlockEntity) {
+                ItemScatterer.spawn(world, pos, (ConveyorBeltBlockEntity)blockEntity);
+            }
+            super.onStateReplaced(state, world, pos, newState, moved);
+        }
+    }
+
     @Override
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
         if (world.isClient) return ActionResult.SUCCESS;
-        Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
+        ConveyorBeltBlockEntity blockEntity = (ConveyorBeltBlockEntity) world.getBlockEntity(blockPos);
+        Inventory inventory = blockEntity;
 
         if (!player.getStackInHand(hand).isEmpty()) {
             // Put an item from the player's hand in
-            if (blockEntity.getStack(0).isEmpty()) {
+            if (inventory.getStack(0).isEmpty()) {
                 // Put the stack the player is holding into the inventory
-                blockEntity.setStack(0, player.getStackInHand(hand).copy());
+                ItemStack itemStack = player.getStackInHand(hand).copy();
+                itemStack.setCount(1);
+                inventory.setStack(0, itemStack);
                 // Remove the stack from the player's hand
-                player.getStackInHand(hand).setCount(0);
-            } else {
-                // If the inventory is full we'll print it's contents
-                System.out.println("The first slot holds "
-                        + blockEntity.getStack(0));
+                player.getStackInHand(hand).setCount(player.getStackInHand(hand).getCount() - 1);
+                blockEntity.progress = 0.0f;
             }
         } else {
             // If the player is not holding anything we'll get give them the item in the block entity
 
             // Give it to the player
-            if (!blockEntity.getStack(0).isEmpty()) {
-                player.getInventory().offerOrDrop(blockEntity.getStack(0));
-                blockEntity.removeStack(0);
+            if (!inventory.getStack(0).isEmpty()) {
+                player.getInventory().offerOrDrop(inventory.getStack(0));
+                inventory.removeStack(0);
+                blockEntity.progress = 0.0f;
             }
         }
-        blockEntity.markDirty();
+        inventory.markDirty();
 
         return ActionResult.SUCCESS;
     }

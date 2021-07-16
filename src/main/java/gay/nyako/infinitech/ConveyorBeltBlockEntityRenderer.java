@@ -29,23 +29,23 @@ public class ConveyorBeltBlockEntityRenderer implements BlockEntityRenderer<Conv
         if (!stack.isEmpty()) {
             // Move the item
 
-            float offset = 0.25f + blockEntity.progress;
+            float offset = 0.1f + blockEntity.progress;
 
             switch (dir) {
                 case NORTH:
-                    matrices.translate(0.5, 0.125, 1 - offset);
+                    matrices.translate(0.5, 0.15, 1 - offset);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(0));
                     break;
                 case SOUTH:
-                    matrices.translate(0.5, 0.125, 0 + offset);
+                    matrices.translate(0.5, 0.15, 0 + offset);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
                     break;
                 case EAST:
-                    matrices.translate(0 + offset, 0.125, 0.5);
+                    matrices.translate(0 + offset, 0.15, 0.5);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(270));
                     break;
                 case WEST:
-                    matrices.translate(1 - offset, 0.125, 0.5);
+                    matrices.translate(1 - offset, 0.15, 0.5);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(90));
                     break;
             }
