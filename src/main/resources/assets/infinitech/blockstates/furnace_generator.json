@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "infinitech:block/furnace_generator" }
+  }
+}
