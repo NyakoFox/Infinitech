@@ -44,7 +44,8 @@ dependencies {
 
 	modApi include("dev.technici4n:FastTransferLib:${project.ftl_version}")
 
-	implementation files("libs/fabric-transfer-api.jar")
+	modApi include("net.fabricmc.fabric-api:fabric-api-lookup-api-v1:${project.lookup_api_version}")
+	modApi include("net.fabricmc.fabric-api:fabric-transfer-api-v1:${project.transfer_version}")
 }
 
 processResources {
