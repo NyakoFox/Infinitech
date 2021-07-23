@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -25,12 +26,23 @@ public class FurnaceGeneratorScreen extends HandledScreen<ScreenHandler> {
         int x = (width - backgroundWidth) / 2;
         int y = (height - backgroundHeight) / 2;
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
+
+        int l;
+        if (((FurnaceGeneratorScreenHandler)this.handler).isBurning()) {
+            l = ((FurnaceGeneratorScreenHandler)this.handler).getFuelProgress();
+            this.drawTexture(matrices, x + 56, y + 36 + 12 - l, 176, 12 - l, 14, l + 1);
+        }
+
     }
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
+        int power = ((FurnaceGeneratorScreenHandler) this.handler).getEnergy();
+        String text = Integer.toString(power);
+        int titleX2 = (backgroundWidth - textRenderer.getWidth(text)) / 2;
+        this.textRenderer.draw(matrices, text, (float)titleX2, (float)this.titleY + 64, 16711935);
         drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
 

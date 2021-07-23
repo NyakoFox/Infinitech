@@ -5,27 +5,34 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ArrayPropertyDelegate;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
 public class FurnaceGeneratorScreenHandler extends ScreenHandler {
     private final Inventory inventory;
+    private final PropertyDelegate propertyDelegate;
 
     //This constructor gets called on the client when the server wants it to open the screenHandler,
     //The client will call the other constructor with an empty Inventory and the screenHandler will automatically
     //sync this empty inventory with the inventory on the server.
     public FurnaceGeneratorScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(1));
+        this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(3));
     }
 
     //This constructor gets called from the BlockEntity on the server without calling the other constructor first, the server knows the inventory of the container
     //and can therefore directly provide it as an argument. This inventory will then be synced to the client.
-    public FurnaceGeneratorScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public FurnaceGeneratorScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate) {
         super(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, syncId);
         checkSize(inventory, 1);
         this.inventory = inventory;
+        this.propertyDelegate = propertyDelegate;
         //some inventories do custom logic when a player opens it.
         inventory.onOpen(playerInventory.player);
+
+        //we need to tell the screenhandler about our propertyDelegate, otherwise it will not sync the data inside.
+        this.addProperties(propertyDelegate);
 
         //This will place the slot in the correct locations for a 3x3 Grid. The slots exist on both server and client!
         //This will not render the background of the slots however, this is the Screens job
@@ -77,5 +84,22 @@ public class FurnaceGeneratorScreenHandler extends ScreenHandler {
         }
 
         return newStack;
+    }
+
+    public int getEnergy() {
+        return this.propertyDelegate.get(2);
+    }
+
+    public boolean isBurning() {
+        return this.propertyDelegate.get(0) > 0;
+    }
+
+    public int getFuelProgress() {
+        int i = this.propertyDelegate.get(1);
+        if (i == 0) {
+            i = 200;
+        }
+
+        return this.propertyDelegate.get(0) * 13 / i;
     }
 }

@@ -1,5 +1,7 @@
 package gay.nyako.infinitech;
 
+import dev.technici4n.fasttransferlib.api.Simulation;
+import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
@@ -26,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity implements NamedScreenHandlerFactory, ImplementedInventory {
+public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity implements NamedScreenHandlerFactory, ImplementedInventory, EnergyIo {
     private static final int[] TOP_SLOTS = new int[]{0};
     private static final int[] BOTTOM_SLOTS = new int[]{2, 1};
     private static final int[] SIDE_SLOTS = new int[]{1};
@@ -35,9 +37,15 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
 
+    private final double maxPower = 2_000_000; // heck it . lots
+    private final double energyRate = 20; // 20 energy per tick maybe??
+    private final double transferRate = 100_000;
+    private double power = 0;
+
     public FurnaceGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state);
-        this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY); // one of them ! one  , ,., , one of th  them  !!!! then , , , the m  o ne !!! one of the m .
+        this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
+
         this.propertyDelegate = new PropertyDelegate() {
             public int get(int index) {
                 switch(index) {
@@ -45,6 +53,8 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                         return FurnaceGeneratorBlockEntity.this.burnTime;
                     case 1:
                         return FurnaceGeneratorBlockEntity.this.fuelTime;
+                    case 2:
+                        return (int) FurnaceGeneratorBlockEntity.this.power;
                     default:
                         return 0;
                 }
@@ -58,12 +68,14 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                     case 1:
                         FurnaceGeneratorBlockEntity.this.fuelTime = value;
                         break;
+                    case 2:
+                        FurnaceGeneratorBlockEntity.this.power = (double) value;
                 }
 
             }
 
             public int size() {
-                return 4;
+                return 3;
             }
         };
     }
@@ -108,6 +120,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         boolean bl = blockEntity.isBurning();
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
+            blockEntity.power += blockEntity.energyRate;
             --blockEntity.burnTime;
         }
 
@@ -123,7 +136,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                         itemStack.decrement(1);
                         if (itemStack.isEmpty()) {
                             Item item2 = item.getRecipeRemainder();
-                            blockEntity.inventory.set(1, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
+                            blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
                         }
                     }
                 }
@@ -241,7 +254,45 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
         //We provide *this* to the screenHandler as our class Implements Inventory
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
-        return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this);
+        return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
+    }
+
+    public double getTransferRate() {
+        return transferRate;
+    }
+
+    @Override
+    public double getEnergy() {
+        return this.power;
+    }
+
+    @Override
+    public double getEnergyCapacity() {
+        return maxPower;
+    }
+
+    @Override
+    public boolean supportsInsertion() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsExtraction() {
+        return true;
+    }
+
+    @Override
+    public double extract(double maxAmount, Simulation simulation) {
+        if(simulation == Simulation.SIMULATE) {
+            return Math.min(power, maxAmount);
+        }
+        double drain = Math.min(power, maxAmount);
+        power -= drain;
+        markDirty();
+        if(world != null && !world.isClient()) {
+            //sync();
+        }
+        return drain;
     }
 
 }

@@ -97,6 +97,9 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
 
         long output = StorageUtil.move(storage, front, item -> true, 64, null);
 
+        sync();
+        world.getBlockEntity(pos.offset(dir)).markDirty();
+
         return (output > 0);
     }
 
