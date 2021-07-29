@@ -37,9 +37,9 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
 
-    private final double maxPower = 2_000_000; // heck it . lots
+    private final double maxPower = 200_000; // heck it . lots
     private final double energyRate = 20; // 20 energy per tick maybe??
-    private final double transferRate = 100_000;
+    private final double transferRate = 1_000; // 1k per tick...
     private double power = 0;
 
     public FurnaceGeneratorBlockEntity(BlockPos pos, BlockState state) {
@@ -106,12 +106,14 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
         Inventories.readNbt(nbt, this.inventory);
         this.burnTime = nbt.getShort("BurnTime");
+        this.power = nbt.getDouble("Energy");
         this.fuelTime = this.getFuelTime((ItemStack)this.inventory.get(0));
     }
 
     public NbtCompound writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putShort("BurnTime", (short)this.burnTime);
+        nbt.putDouble("Energy", this.power);
         Inventories.writeNbt(nbt, this.inventory);
         return nbt;
     }
@@ -121,12 +123,15 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
             blockEntity.power += blockEntity.energyRate;
+            if (blockEntity.power > blockEntity.maxPower) {
+                blockEntity.power = blockEntity.maxPower;
+            }
             --blockEntity.burnTime;
         }
 
         ItemStack itemStack = blockEntity.inventory.get(0); // Fuel
         if (blockEntity.isBurning() || !itemStack.isEmpty()) {
-            if (!blockEntity.isBurning()) {
+            if (!blockEntity.isBurning() && blockEntity.power < blockEntity.maxPower) {
                 blockEntity.burnTime = blockEntity.getFuelTime(itemStack);
                 blockEntity.fuelTime = blockEntity.burnTime;
                 if (blockEntity.isBurning()) {
