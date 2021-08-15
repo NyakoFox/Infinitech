@@ -38,10 +38,10 @@ public class FurnaceGeneratorScreen extends HandledScreen<ScreenHandler> {
 
         int power    = ((FurnaceGeneratorScreenHandler)this.handler).getEnergy();
         int powerMax = 200_000;
-        int percentage = (int) (((double) power / (double) powerMax) * 65); // no it isnt ?? that's not a percentage ally
-        this.drawTexture(matrices, x + 108, y + 36 + 12 + 26 - percentage, 176, 78 - percentage, 8, percentage + 1);
+        int percentage = (int) (((double) power / (double) powerMax) * 48); // no it isnt ?? that's not a percentage ally
+        this.drawTexture(matrices, x + 108, y + 67 - percentage, 176, 62 - percentage, 8, percentage + 1);
 
-        if (mouseX > (x + 107) && mouseY > (y + 10) && mouseX < (x + 108 + 4 + 4) && mouseY < (y + 36 + 12 + 26 + 1)) {
+        if (mouseX > (x + 107) && mouseY > (y + 19) && mouseX < (x + 108 + 4 + 4) && mouseY < (y + 67)) {
             List tooltipList = new ArrayList();
             tooltipList.add(Text.of("Energy stored: " + power + "/200000 E"));
             tooltipList.add(Text.of("Generating: 20 E/t"));
@@ -55,10 +55,10 @@ public class FurnaceGeneratorScreen extends HandledScreen<ScreenHandler> {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
-        int power = ((FurnaceGeneratorScreenHandler) this.handler).getEnergy();
-        String text = Integer.toString(power);
-        int titleX2 = (backgroundWidth - textRenderer.getWidth(text)) / 2;
-        this.textRenderer.draw(matrices, text, (float)titleX2, (float)this.titleY + 64, 16711935);
+        //int power = ((FurnaceGeneratorScreenHandler) this.handler).getEnergy();
+        //String text = Integer.toString(power);
+        //int titleX2 = (backgroundWidth - textRenderer.getWidth(text)) / 2;
+        //this.textRenderer.draw(matrices, text, (float)titleX2, (float)this.titleY + 64, 16711935);
         drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
 

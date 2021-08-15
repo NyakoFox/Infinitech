@@ -28,6 +28,10 @@ repositories {
 		name = "BuildCraft"
 		url = "https://mod-buildcraft.com/maven"
 	}
+	maven {
+		name = "CottonMC"
+		url = "https://server.bbkr.space/artifactory/libs-release"
+	}
 }
 
 dependencies {

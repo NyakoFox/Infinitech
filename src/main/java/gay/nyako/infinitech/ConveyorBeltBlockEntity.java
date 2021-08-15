@@ -64,6 +64,7 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
 
         Storage<ItemVariant> back = ItemStorage.SIDED.find(world, pos.offset(dir.getOpposite()), dir);
         StorageUtil.move(back, storage , item -> true, 1, null);
+        sync();
     }
 
     public boolean insert() {
