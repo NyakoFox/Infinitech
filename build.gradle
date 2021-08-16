@@ -50,6 +50,8 @@ dependencies {
 
 	modApi include("net.fabricmc.fabric-api:fabric-api-lookup-api-v1:${project.lookup_api_version}")
 	modApi include("net.fabricmc.fabric-api:fabric-transfer-api-v1:${project.transfer_version}")
+
+	modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
 }
 
 processResources {

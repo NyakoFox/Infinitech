@@ -51,7 +51,6 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
 
         this.propertyDelegate = new PropertyDelegate() {
-            @Override
             public int get(int index) {
                 switch(index) {
                     case 0:
@@ -65,7 +64,6 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                 }
             }
 
-            @Override
             public void set(int index, int value) {
                 switch(index) {
                     case 0:
@@ -80,7 +78,6 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
 
             }
 
-            @Override
             public int size() {
                 return 3;
             }
