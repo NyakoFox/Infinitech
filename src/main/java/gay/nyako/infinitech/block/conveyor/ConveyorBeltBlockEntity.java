@@ -1,5 +1,7 @@
-package gay.nyako.infinitech;
+package gay.nyako.infinitech.block.conveyor;
 
+import gay.nyako.infinitech.ImplementedInventory;
+import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;

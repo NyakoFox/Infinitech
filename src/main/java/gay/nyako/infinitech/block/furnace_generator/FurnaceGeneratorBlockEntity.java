@@ -1,7 +1,9 @@
-package gay.nyako.infinitech;
+package gay.nyako.infinitech.block.furnace_generator;
 
 import dev.technici4n.fasttransferlib.api.Simulation;
 import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
+import gay.nyako.infinitech.ImplementedInventory;
+import gay.nyako.infinitech.InfinitechMod;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
@@ -16,10 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.screen.FurnaceScreenHandler;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.*;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.collection.DefaultedList;
@@ -32,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, InventoryProvider, ImplementedInventory, EnergyIo {
+public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
     private static final int[] TOP_SLOTS = new int[]{0};
     private static final int[] BOTTOM_SLOTS = new int[]{2, 1};
     private static final int[] SIDE_SLOTS = new int[]{1};
@@ -266,7 +265,8 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
         //We provide *this* to the screenHandler as our class Implements Inventory
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
-        return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
+        //return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
+        return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos));
     }
 
     public double getTransferRate() {
@@ -309,7 +309,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
 
     @Override
     public SidedInventory getInventory(BlockState state, WorldAccess world, BlockPos pos) {
-        return (SidedInventory) this;
+        return this;
     }
 
     @Override

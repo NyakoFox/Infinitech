@@ -1,5 +1,6 @@
-package gay.nyako.infinitech;
+package gay.nyako.infinitech.block.conveyor;
 
+import gay.nyako.infinitech.InfinitechMod;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;

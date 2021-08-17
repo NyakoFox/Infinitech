@@ -1,4 +1,4 @@
-package gay.nyako.infinitech;
+package gay.nyako.infinitech.block.conveyor;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
@@ -11,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 
 public class ConveyorBeltBlockEntityRenderer implements BlockEntityRenderer<ConveyorBeltBlockEntity> {

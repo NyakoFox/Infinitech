@@ -1,5 +1,10 @@
 package gay.nyako.infinitech;
 
+import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
+import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
+import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
+import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
+import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -11,7 +16,6 @@ import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
@@ -31,6 +35,7 @@ public class InfinitechMod implements ModInitializer {
 	public static final Block FURNACE_GENERATOR_BLOCK = new FurnaceGeneratorBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
+			.luminance(FurnaceGeneratorBlock.getLuminance())
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 

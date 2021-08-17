@@ -2,7 +2,7 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "top": "infinitech:block/furnace_generator_top",
-    "front": "infinitech:block/furnace_generator_front",
+    "front": "infinitech:block/furnace_generator_front_on",
     "side": "infinitech:block/furnace_generator_side"
   }
 }
