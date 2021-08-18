@@ -1,7 +1,10 @@
 package gay.nyako.infinitech.block.furnace_generator;
 
 import dev.technici4n.fasttransferlib.api.Simulation;
+import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
 import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
+import dev.technici4n.fasttransferlib.api.energy.EnergyMovement;
+import dev.technici4n.fasttransferlib.api.energy.EnergyPreconditions;
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
@@ -9,6 +12,7 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -132,7 +136,18 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
             if (blockEntity.power > blockEntity.maxPower) {
                 blockEntity.power = blockEntity.maxPower;
             }
+
             --blockEntity.burnTime;
+        }
+
+        for (Direction dir : Direction.values()) {
+
+            EnergyIo io = EnergyApi.SIDED.find(world,pos.offset(dir),dir.getOpposite());
+
+            if (io != null) {
+                double meowww = EnergyMovement.move(blockEntity, io, blockEntity.transferRate);
+                System.out.println(dir.toString() + ": " + meowww);
+            }
         }
 
         ItemStack itemStack = blockEntity.inventory.get(0); // Fuel
@@ -295,16 +310,19 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
 
     @Override
     public double extract(double maxAmount, Simulation simulation) {
-        if(simulation == Simulation.SIMULATE) {
-            return Math.min(power, maxAmount);
+        EnergyPreconditions.notNegative(maxAmount);
+        double amountExtracted = Math.min(maxAmount, power);
+
+        if (amountExtracted > 1e-9) {
+            if (simulation.isActing()) {
+                power -= amountExtracted;
+                markDirty();
+            }
+
+            return amountExtracted;
         }
-        double drain = Math.min(power, maxAmount);
-        power -= drain;
-        markDirty();
-        if(world != null && !world.isClient()) {
-            //sync();
-        }
-        return drain;
+
+        return 0;
     }
 
     @Override

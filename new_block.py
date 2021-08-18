@@ -35,7 +35,6 @@ def main():
         file.write(
 """{
     "parent": \"""" + MODID +""":block/""" + block_name + """\"
-  }
 }""")
 
     print(f"src/main/resources/assets/{MODID}/models/item/{block_name}.json")
