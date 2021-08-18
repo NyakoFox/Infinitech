@@ -145,8 +145,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
             EnergyIo io = EnergyApi.SIDED.find(world,pos.offset(dir),dir.getOpposite());
 
             if (io != null) {
-                double meowww = EnergyMovement.move(blockEntity, io, blockEntity.transferRate);
-                System.out.println(dir.toString() + ": " + meowww);
+                EnergyMovement.move(blockEntity, io, blockEntity.transferRate);
             }
         }
 

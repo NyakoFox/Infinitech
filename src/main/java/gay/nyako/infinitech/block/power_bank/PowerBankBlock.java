@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class PowerBankBlock extends BlockWithEntity {
-    protected PowerBankBlock(Settings settings) {
+    public PowerBankBlock(Settings settings) {
         super(settings);
     }
 

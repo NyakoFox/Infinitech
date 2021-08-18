@@ -6,6 +6,7 @@ import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
+import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -43,7 +44,7 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<FurnaceGeneratorBlockEntity> FURNACE_GENERATOR_BLOCK_ENTITY;
 
-	public static final Block POWER_BANK_BLOCK = new FurnaceGeneratorBlock(FabricBlockSettings
+	public static final Block POWER_BANK_BLOCK = new PowerBankBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
 			.breakByTool(FabricToolTags.PICKAXES, 1)
