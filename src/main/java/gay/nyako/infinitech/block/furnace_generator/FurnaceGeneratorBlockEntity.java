@@ -1,19 +1,16 @@
 package gay.nyako.infinitech.block.furnace_generator;
 
-import dev.technici4n.fasttransferlib.api.Simulation;
 import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
 import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
 import dev.technici4n.fasttransferlib.api.energy.EnergyMovement;
-import dev.technici4n.fasttransferlib.api.energy.EnergyPreconditions;
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
+import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
@@ -35,22 +32,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
-    private static final int[] TOP_SLOTS = new int[]{0};
-    private static final int[] BOTTOM_SLOTS = new int[]{2, 1};
-    private static final int[] SIDE_SLOTS = new int[]{1};
+public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
+    private static final int[] SLOTS = new int[]{0};
     protected DefaultedList<ItemStack> inventory;
     int burnTime;
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
 
-    private final double maxPower = 200_000; // heck it . lots
     private final double energyRate = 20; // 20 energy per tick maybe??
-    private final double transferRate = 1_000; // 1k per tick...
-    private double power = 0;
 
     public FurnaceGeneratorBlockEntity(BlockPos pos, BlockState state) {
-        super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state);
+        super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state, 200_000, 1_000);
+        this.canInsert = false;
+        this.canExtract = true;
         this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
 
         this.propertyDelegate = new PropertyDelegate() {
@@ -62,7 +56,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                     case 1:
                         return FurnaceGeneratorBlockEntity.this.fuelTime;
                     case 2:
-                        return (int) FurnaceGeneratorBlockEntity.this.power;
+                        return (int) FurnaceGeneratorBlockEntity.this.energy;
                     default:
                         return 0;
                 }
@@ -78,7 +72,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
                         FurnaceGeneratorBlockEntity.this.fuelTime = value;
                         break;
                     case 2:
-                        FurnaceGeneratorBlockEntity.this.power = (double) value;
+                        FurnaceGeneratorBlockEntity.this.energy = (double) value;
                 }
 
             }
@@ -116,14 +110,12 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
         Inventories.readNbt(nbt, this.inventory);
         this.burnTime = nbt.getShort("BurnTime");
-        this.power = nbt.getDouble("Energy");
         this.fuelTime = this.getFuelTime((ItemStack)this.inventory.get(0));
     }
 
     public NbtCompound writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putShort("BurnTime", (short)this.burnTime);
-        nbt.putDouble("Energy", this.power);
         Inventories.writeNbt(nbt, this.inventory);
         return nbt;
     }
@@ -132,9 +124,9 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         boolean bl = blockEntity.isBurning();
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
-            blockEntity.power += blockEntity.energyRate;
-            if (blockEntity.power > blockEntity.maxPower) {
-                blockEntity.power = blockEntity.maxPower;
+            blockEntity.energy += blockEntity.energyRate;
+            if (blockEntity.energy > blockEntity.capacity) {
+                blockEntity.energy = blockEntity.capacity;
             }
 
             --blockEntity.burnTime;
@@ -151,7 +143,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
 
         ItemStack itemStack = blockEntity.inventory.get(0); // Fuel
         if (blockEntity.isBurning() || !itemStack.isEmpty()) {
-            if (!blockEntity.isBurning() && blockEntity.power < blockEntity.maxPower) {
+            if (!blockEntity.isBurning() && blockEntity.energy < blockEntity.capacity) {
                 blockEntity.burnTime = blockEntity.getFuelTime(itemStack);
                 blockEntity.fuelTime = blockEntity.burnTime;
                 if (blockEntity.isBurning()) {
@@ -194,11 +186,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     }
 
     public int[] getAvailableSlots(Direction side) {
-        if (side == Direction.DOWN) {
-            return BOTTOM_SLOTS;
-        } else {
-            return side == Direction.UP ? TOP_SLOTS : SIDE_SLOTS;
-        }
+        return SLOTS;
     }
 
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
@@ -206,7 +194,7 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
     }
 
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        if (dir == Direction.DOWN && slot == 1) {
+        if (dir == Direction.DOWN) {
             return stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.BUCKET);
         } else {
             return true;
@@ -281,47 +269,6 @@ public class FurnaceGeneratorBlockEntity extends LockableContainerBlockEntity im
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
         //return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
         return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos));
-    }
-
-    public double getTransferRate() {
-        return transferRate;
-    }
-
-    @Override
-    public double getEnergy() {
-        return this.power;
-    }
-
-    @Override
-    public double getEnergyCapacity() {
-        return maxPower;
-    }
-
-    @Override
-    public boolean supportsInsertion() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsExtraction() {
-        return true;
-    }
-
-    @Override
-    public double extract(double maxAmount, Simulation simulation) {
-        EnergyPreconditions.notNegative(maxAmount);
-        double amountExtracted = Math.min(maxAmount, power);
-
-        if (amountExtracted > 1e-9) {
-            if (simulation.isActing()) {
-                power -= amountExtracted;
-                markDirty();
-            }
-
-            return amountExtracted;
-        }
-
-        return 0;
     }
 
     @Override
