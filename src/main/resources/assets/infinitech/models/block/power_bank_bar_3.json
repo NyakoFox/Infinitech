@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "infinitech:block/machine_top",
+    "side": "infinitech:block/power_bank_bar_3"
+  }
+}

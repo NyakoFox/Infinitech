@@ -1,6 +1,7 @@
 {
-  "parent": "block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "": { "all": "infinitech:block/power_bank" }
+    "end": "minecraft:block/generator_top",
+    "side": "minecraft:block/power_bank_bar_0"
   }
 }

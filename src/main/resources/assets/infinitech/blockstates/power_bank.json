@@ -1,5 +1,37 @@
 {
   "variants": {
-    "": { "model": "infinitech:block/power_bank" }
+    "percentage=0": {
+      "model": "infinitech:block/power_bank_bar_0"
+    },
+    "percentage=1": {
+      "model": "infinitech:block/power_bank_bar_1"
+    },
+    "percentage=2": {
+      "model": "infinitech:block/power_bank_bar_2"
+    },
+    "percentage=3": {
+      "model": "infinitech:block/power_bank_bar_3"
+    },
+    "percentage=4": {
+      "model": "infinitech:block/power_bank_bar_4"
+    },
+    "percentage=5": {
+      "model": "infinitech:block/power_bank_bar_5"
+    },
+    "percentage=6": {
+      "model": "infinitech:block/power_bank_bar_6"
+    },
+    "percentage=7": {
+      "model": "infinitech:block/power_bank_bar_7"
+    },
+    "percentage=8": {
+      "model": "infinitech:block/power_bank_bar_8"
+    },
+    "percentage=9": {
+      "model": "infinitech:block/power_bank_bar_9"
+    },
+    "percentage=10": {
+      "model": "infinitech:block/power_bank_bar_10"
+    }
   }
 }

@@ -8,6 +8,7 @@ import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
@@ -33,6 +34,10 @@ public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
         root.add(itemSlot, 72, 27);
 
         WEnergyBar energyBar = new WEnergyBar(2,200000, true);
+        energyBar.setTooltipCallback(information -> {
+            information.add(Text.of("Generating: 20 E/t"));
+            information.add(Text.of("Transfer rate: 1000 E/t"));
+        });
         root.add(energyBar, 72 + 29, 27 - 15, 8, 48);
 
         root.add(this.createPlayerInventoryPanel(), 0, 65);
