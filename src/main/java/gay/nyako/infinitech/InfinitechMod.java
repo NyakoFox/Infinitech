@@ -1,6 +1,8 @@
 package gay.nyako.infinitech;
 
 import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
+import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
+import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
@@ -22,8 +24,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 
 public class InfinitechMod implements ModInitializer {
 
@@ -55,6 +59,15 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<PowerBankBlockEntity> POWER_BANK_BLOCK_ENTITY;
 
+	public static final Block CARDBOARD_BOX_BLOCK = new CardboardBoxBlock(FabricBlockSettings
+			.of(Material.WOOD)
+			.sounds(BlockSoundGroup.WOOD)
+			.strength(2.0f)
+			.breakByTool(FabricToolTags.AXES, 1)
+	);
+
+	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
+
 	@Override
 	public void onInitialize() { // modid is "infinitech"
 		System.out.println("hi from infinitech!!");
@@ -72,5 +85,10 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier("infinitech", "power_bank"), new BlockItem(POWER_BANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		POWER_BANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "infinitech:power_bank_entity", FabricBlockEntityTypeBuilder.create(PowerBankBlockEntity::new, POWER_BANK_BLOCK).build(null));
 		EnergyApi.SIDED.registerSelf(POWER_BANK_BLOCK_ENTITY);
+
+		Registry.register(Registry.BLOCK, new Identifier("infinitech", "cardboard_box"), CARDBOARD_BOX_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier("infinitech", "cardboard_box"), new BlockItem(CARDBOARD_BOX_BLOCK, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
+		FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
+		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "infinitech:cardboard_box_entity", FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
 	}
 }
