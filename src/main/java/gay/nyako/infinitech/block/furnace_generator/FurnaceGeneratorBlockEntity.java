@@ -7,6 +7,8 @@ import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.InventoryProvider;
@@ -19,7 +21,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.*;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.collection.DefaultedList;
@@ -32,9 +36,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
+public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
     private static final int[] SLOTS = new int[]{0};
-    protected DefaultedList<ItemStack> inventory;
+    protected DefaultedList<ItemStack> inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
+    private final InventoryStorage storage = InventoryStorage.of(this, null);
     int burnTime;
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
@@ -45,7 +50,6 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state, 200_000, 1_000);
         this.canInsert = false;
         this.canExtract = true;
-        this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
 
         this.propertyDelegate = new PropertyDelegate() {
             @Override
@@ -93,10 +97,6 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         return new TranslatableText(getCachedState().getBlock().getTranslationKey());
     }
 
-    protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
-        return new FurnaceScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
-    }
-
     public static Map<Item, Integer> createFuelTimeMap() {
         return AbstractFurnaceBlockEntity.createFuelTimeMap();
     }
@@ -140,6 +140,8 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
                 EnergyMovement.move(blockEntity, io, blockEntity.transferRate);
             }
         }
+
+        blockEntity.attemptSideTransfers(blockEntity.storage);
 
         ItemStack itemStack = blockEntity.inventory.get(0); // Fuel
         if (blockEntity.isBurning() || !itemStack.isEmpty()) {
@@ -268,7 +270,7 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         //We provide *this* to the screenHandler as our class Implements Inventory
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
         //return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
-        return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos));
+        return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos), pos);
     }
 
     @Override
@@ -279,5 +281,10 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
     @Override
     public PropertyDelegate getPropertyDelegate() {
         return this.propertyDelegate;
+    }
+
+    @Override
+    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+        buf.writeBlockPos(pos);
     }
 }

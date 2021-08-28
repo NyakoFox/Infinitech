@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block.pipe;
 
 import alexiil.mc.lib.multipart.api.render.PartModelBaker;
 import alexiil.mc.lib.multipart.api.render.PartRenderContext;
+import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.texture.Sprite;
@@ -12,8 +13,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
 public class PipePartModelBaker implements PartModelBaker<PipePartModelKey> {
-    public static SpriteIdentifier CONNECTOR_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("infinitech", "block/pipe/connector"));
-    public static SpriteIdentifier ENERGY_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("infinitech", "block/pipe/energy"));
+    public static SpriteIdentifier CONNECTOR_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
+    public static SpriteIdentifier ENERGY_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy"));
 
     @Override
     public void emitQuads(PipePartModelKey key, PartRenderContext ctx) {

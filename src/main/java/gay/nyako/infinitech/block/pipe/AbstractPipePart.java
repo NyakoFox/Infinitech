@@ -6,6 +6,7 @@ import alexiil.mc.lib.multipart.api.event.PartTickEvent;
 import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
 import com.google.common.collect.Lists;
+import gay.nyako.infinitech.InfinitechMod;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
@@ -23,7 +24,7 @@ public abstract class AbstractPipePart extends AbstractPart {
     public static final NetIdDataK<AbstractPipePart> CONNECTION_DATA;
 
     static {
-        NET_PIPE = NET_ID.subType(AbstractPipePart.class, "infinitech:pipe");
+        NET_PIPE = NET_ID.subType(AbstractPipePart.class, InfinitechMod.MOD_ID + ":pipe");
         CONNECTION_DATA = NET_PIPE.idData("pipe_connection_data").setReceiver(AbstractPipePart::receiveConnectionData);
     }
 

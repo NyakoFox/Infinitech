@@ -35,6 +35,10 @@ public class StoragePipeRelay<T> extends SnapshotParticipant<Integer> implements
     public long insert(T resource, long maxAmount, TransactionContext transaction) {
         var storages = pipe.getConnectedStorages(side);
 
+        if (storages.size() == 0) {
+            return 0;
+        }
+
         updateSnapshots(transaction);
 
         var toInsert = maxAmount;

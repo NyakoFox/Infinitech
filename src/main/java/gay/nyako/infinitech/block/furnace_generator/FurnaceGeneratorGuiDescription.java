@@ -2,23 +2,30 @@ package gay.nyako.infinitech.block.furnace_generator;
 
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.WEnergyBar;
+import gay.nyako.infinitech.WSideButton;
+import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
+import gay.nyako.infinitech.block.MachineUtil;
 import io.github.cottonmc.cotton.gui.SyncedGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
     private static final int INVENTORY_SIZE = 1;
     private static final int PROPERTY_COUNT = 3;
 
-    public FurnaceGeneratorGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+    public FurnaceGeneratorGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, BlockPos blockPos) {
         super(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, syncId, playerInventory, getBlockInventory(context, INVENTORY_SIZE),getBlockPropertyDelegate(context, PROPERTY_COUNT));
 
         WPlainPanel root = new WPlainPanel();
+
         setRootPanel(root);
         setTitleAlignment(HorizontalAlignment.CENTER);
 
@@ -39,6 +46,16 @@ public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
             information.add(Text.of("Transfer rate: 1000 E/t"));
         });
         root.add(energyBar, 72 + 29, 27 - 15, 8, 48);
+
+        BlockEntity blockEntity = playerInventory.player.world.getBlockEntity(blockPos);
+
+        if (blockEntity instanceof AbstractMachineBlockEntity machineBlockEntity) {
+            int fuck = 0;
+            for (MachineUtil.Sides side : MachineUtil.Sides.values()) {
+                fuck += 10;
+                root.add(new WSideButton(machineBlockEntity.sides.get(side), side, blockPos), fuck, 20, 10, 10);
+            }
+        }
 
         root.add(this.createPlayerInventoryPanel(), 0, 65);
 

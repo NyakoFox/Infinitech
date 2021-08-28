@@ -3,16 +3,13 @@ package gay.nyako.infinitech;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WBar;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class WEnergyBar extends WBar {
-    private static final Identifier ENERGY_BAR_BG = new Identifier("infinitech", "textures/gui/container/energy_empty.png");
-    private static final Identifier ENERGY_BAR_FG = new Identifier("infinitech", "textures/gui/container/energy_full.png");
+    private static final Identifier ENERGY_BAR_BG = new Identifier(InfinitechMod.MOD_ID, "textures/gui/container/energy_empty.png");
+    private static final Identifier ENERGY_BAR_FG = new Identifier(InfinitechMod.MOD_ID, "textures/gui/container/energy_full.png");
 
     public final int field;
 
