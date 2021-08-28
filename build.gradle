@@ -47,11 +47,8 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 
 	modApi include("dev.technici4n:FastTransferLib:${project.ftl_version}")
-
-	modApi include("net.fabricmc.fabric-api:fabric-api-lookup-api-v1:${project.lookup_api_version}")
-	modApi include("net.fabricmc.fabric-api:fabric-transfer-api-v1:${project.transfer_version}")
-
 	modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
+	modApi include("alexiil.mc.lib:libmultipart-all:${project.libmultipart_version}")
 }
 
 processResources {

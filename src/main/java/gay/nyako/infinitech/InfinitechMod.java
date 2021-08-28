@@ -1,5 +1,6 @@
 package gay.nyako.infinitech;
 
+import alexiil.mc.lib.multipart.api.PartDefinition;
 import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
@@ -8,6 +9,8 @@ import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
+import gay.nyako.infinitech.block.pipe.ItemPipePart;
+import gay.nyako.infinitech.block.pipe.PipePartItem;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
@@ -21,6 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
@@ -28,8 +32,12 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class InfinitechMod implements ModInitializer {
+	public static Logger LOGGER = LogManager.getLogger();
 
 	public static final Block CONVEYOR_BELT_BLOCK = new ConveyorBeltBlock(FabricBlockSettings
 			.of(Material.METAL)
@@ -68,9 +76,12 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
 
+	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier("infinitech", "item_pipe"), ItemPipePart::new, ItemPipePart::new);
+	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.INVENTORY), h -> new ItemPipePart(ITEM_PIPE_PART, h));
+
 	@Override
 	public void onInitialize() { // modid is "infinitech"
-		System.out.println("hi from infinitech!!");
+		log(Level.INFO, "hi from infinitech!!");
 
 		Registry.register(Registry.BLOCK, new Identifier("infinitech", "conveyor_belt"), CONVEYOR_BELT_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier("infinitech", "conveyor_belt"), new BlockItem(CONVEYOR_BELT_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
@@ -90,5 +101,12 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier("infinitech", "cardboard_box"), new BlockItem(CARDBOARD_BOX_BLOCK, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
 		FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
 		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "infinitech:cardboard_box_entity", FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
+
+		Registry.register(Registry.ITEM, new Identifier("infinitech", "item_pipe"), ITEM_PIPE_ITEM);
+		ITEM_PIPE_PART.register();
+	}
+
+	public static void log(Level level, String message){
+		LOGGER.log(level, message);
 	}
 }
