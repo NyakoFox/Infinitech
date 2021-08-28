@@ -3,11 +3,8 @@ package gay.nyako.infinitech;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WBar;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class WEnergyBar extends WBar {

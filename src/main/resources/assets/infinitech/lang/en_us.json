@@ -1,6 +1,6 @@
 {
     "block.infinitech.furnace_generator": "Furnace Generator",
-    "block.infinitech.conveyor_belt": "Conveyor Belt"
-    "block.infinitech.cardboard_box": "Cardboard Box"
+    "block.infinitech.conveyor_belt": "Conveyor Belt",
+    "block.infinitech.cardboard_box": "Cardboard Box",
 	"container.infinitech.cardboard_box": "Cardboard Box"
 }
