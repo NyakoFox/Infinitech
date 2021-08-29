@@ -20,27 +20,9 @@ public class PipePartModelBaker implements PartModelBaker<PipePartModelKey> {
     public void emitQuads(PipePartModelKey key, PartRenderContext ctx) {
         var emitter = ctx.getEmitter();
 
-        emitVoxelShape(emitter, CONNECTOR_SPRITE.getSprite(), key.getCenterShape());
-        for (VoxelShape shape : key.getConnectionShapes()) {
-            emitVoxelShape(emitter, key.getSprite(), shape);
+        key.getCenterShape().emit(emitter, CONNECTOR_SPRITE.getSprite());
+        for (PipeShape shape : key.getConnectionShapes()) {
+            shape.emit(emitter, key.getSprite());
         }
-    }
-
-    private void emitVoxelShape(QuadEmitter emitter, Sprite sprite, VoxelShape shape) {
-        var box = shape.getBoundingBox();
-
-        emitSingleQuad(emitter, sprite, Direction.UP, box.minX, 1 - box.maxZ, box.maxX, 1 - box.minZ, 1 - box.maxY);
-        emitSingleQuad(emitter, sprite, Direction.DOWN, box.minX, box.minZ, box.maxX, box.maxZ, box.minY);
-        emitSingleQuad(emitter, sprite, Direction.EAST, 1 - box.maxZ, box.minY, 1 - box.minZ, box.maxY, 1 - box.maxX);
-        emitSingleQuad(emitter, sprite, Direction.WEST, box.minZ, box.minY, box.maxZ, box.maxY, box.minX);
-        emitSingleQuad(emitter, sprite, Direction.SOUTH, box.minX, box.minY, box.maxX, box.maxY, 1 - box.maxZ);
-        emitSingleQuad(emitter, sprite, Direction.NORTH, 1 - box.maxX, box.minY, 1 - box.minX, box.maxY, box.minZ);
-    }
-
-    private void emitSingleQuad(QuadEmitter emitter, Sprite sprite, Direction direction, double left, double bottom, double right, double top, double depth) {
-        emitter.square(direction, (float)left, (float)bottom, (float)right, (float)top, (float)depth);
-        emitter.spriteBake(0, sprite, MutableQuadView.BAKE_LOCK_UV);
-        emitter.spriteColor(0, -1, -1, -1, -1);
-        emitter.emit();
     }
 }

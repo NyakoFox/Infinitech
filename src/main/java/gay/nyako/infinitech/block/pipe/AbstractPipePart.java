@@ -8,6 +8,7 @@ import alexiil.mc.lib.net.*;
 import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -31,6 +32,7 @@ public abstract class AbstractPipePart extends AbstractPart {
     protected Set<Direction> connectedSides;
     protected Hashtable<Direction, AbstractPipePart> pipeConnections;
     protected Hashtable<Direction, PipeConnectionContext> connections;
+    private boolean needsUpdate;
 
     public AbstractPipePart(PartDefinition definition, MultipartHolder holder) {
         super(definition, holder);
@@ -46,14 +48,19 @@ public abstract class AbstractPipePart extends AbstractPart {
     @Override
     public void onAdded(MultipartEventBus bus) {
         bus.addListener(this, NeighbourUpdateEvent.class, (event) -> {
-            updateConnections();
-            syncConnections();
+            needsUpdate = true;
         });
         bus.addListener(this, PartTickEvent.class, (event) -> tick());
         updateConnections();
     }
 
-    public abstract void tick();
+    public void tick() {
+        if (needsUpdate) {
+            updateConnections();
+            syncConnections();
+            needsUpdate = false;
+        }
+    }
 
     public abstract boolean isValidPipe(AbstractPipePart pipe, Direction directionTo);
 
@@ -144,8 +151,7 @@ public abstract class AbstractPipePart extends AbstractPart {
         var key = (PipePartModelKey) getModelKey();
         var shapes = key.getConnectionShapes();
         shapes.add(key.getCenterShape());
-
-        return shapes.stream().reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
+        return shapes.stream().map(PipeShape::toVoxelShape).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
     }
 
     @Nullable

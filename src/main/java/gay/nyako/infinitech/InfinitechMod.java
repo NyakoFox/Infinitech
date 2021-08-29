@@ -1,6 +1,7 @@
 package gay.nyako.infinitech;
 
 import alexiil.mc.lib.multipart.api.PartDefinition;
+import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
 import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.MachineUtil;
@@ -23,6 +24,7 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
@@ -113,6 +115,16 @@ public class InfinitechMod implements ModInitializer {
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
+
+		ItemStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
+			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
+				var itemPipe = multipartBE.getContainer().getFirstPart(ItemPipePart.class);
+				if (itemPipe != null) {
+					return itemPipe.getStorage(side);
+				}
+			}
+			return null;
+		});
 
 		ServerSidePacketRegistry.INSTANCE.register(SIDE_CHOICE_UI_PACKET_ID, (packetContext, attachedData) -> {
 			MachineUtil.Sides side = attachedData.readEnumConstant(MachineUtil.Sides.class);

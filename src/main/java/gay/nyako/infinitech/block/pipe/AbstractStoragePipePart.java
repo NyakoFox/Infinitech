@@ -49,6 +49,7 @@ public abstract class AbstractStoragePipePart<T> extends AbstractPipePart {
 
     @Override
     public void tick() {
+        super.tick();
         if (!holder.getContainer().isClientWorld() && mode == Mode.EXTRACT) {
             var connections = getConnections();
             var ignorePositions = new HashSet<BlockPos>();

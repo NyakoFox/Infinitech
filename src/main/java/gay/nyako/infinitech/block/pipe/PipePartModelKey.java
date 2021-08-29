@@ -8,10 +8,7 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class PipePartModelKey extends PartModelKey {
     public final Class<?> clazz;
@@ -24,31 +21,22 @@ public class PipePartModelKey extends PartModelKey {
         this.connections = pipePart.getConnectedSides();
     }
 
-    public VoxelShape getCenterShape() {
-        return Block.createCuboidShape(5.5, 5.5, 5.5, 10.5, 10.5, 10.5);
+    public double getCenterSize() {
+        return 5;
     }
 
-    public List<VoxelShape> getConnectionShapes() {
-        var list = Lists.<VoxelShape>newArrayList();
-        if (connections.contains(Direction.NORTH)) {
-            list.add(Block.createCuboidShape(6, 6, 0, 10, 10, 6));
+    public PipeShape getCenterShape() {
+        var min = 8 - getCenterSize()/2;
+        var max = 8 + getCenterSize()/2;
+        return PipeShape.fromBlockCoords(null, min, min, min, max, max, max);
+    }
+
+    public List<PipeShape> getConnectionShapes() {
+        if (connections.size() > 0) {
+            return new ArrayList<>(connections.stream().map(PipeShape::of).toList());
+        } else {
+            return new ArrayList<>();
         }
-        if (connections.contains(Direction.EAST)) {
-            list.add(Block.createCuboidShape(10, 6, 6, 16, 10, 10));
-        }
-        if (connections.contains(Direction.SOUTH)) {
-            list.add(Block.createCuboidShape(6, 6, 10, 10, 10, 16));
-        }
-        if (connections.contains(Direction.WEST)) {
-            list.add(Block.createCuboidShape(0, 6, 6, 6, 10, 10));
-        }
-        if (connections.contains(Direction.UP)) {
-            list.add(Block.createCuboidShape(6, 10, 6, 10, 16, 10));
-        }
-        if (connections.contains(Direction.DOWN)) {
-            list.add(Block.createCuboidShape(6, 0, 6, 10, 6, 10));
-        }
-        return list;
     }
 
     public Sprite getSprite() {

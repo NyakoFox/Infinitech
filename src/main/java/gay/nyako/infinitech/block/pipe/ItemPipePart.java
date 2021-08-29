@@ -9,6 +9,8 @@ import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.nbt.NbtCompound;
@@ -50,5 +52,10 @@ public class ItemPipePart extends AbstractStoragePipePart<ItemVariant> {
     @Override
     public SpriteIdentifier getSpriteIdentifier() {
         return ITEM_PIPE_SPRITE;
+    }
+
+    @Override
+    protected BlockState getClosestBlockState() {
+        return Blocks.GLASS.getDefaultState();
     }
 }
