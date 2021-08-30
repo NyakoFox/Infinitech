@@ -53,7 +53,7 @@ public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
             int fuck = 0;
             for (MachineUtil.Sides side : MachineUtil.Sides.values()) {
                 fuck += 10;
-                root.add(new WSideButton(machineBlockEntity.sides.get(side), side, blockPos), fuck, 20, 10, 10);
+                root.add(new WSideButton(machineBlockEntity.sides.get(side), side, blockPos, false, true), fuck, 20, 10, 10);
             }
         }
 

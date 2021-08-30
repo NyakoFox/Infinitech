@@ -22,11 +22,23 @@ public class WSideButton extends WWidget {
     public MachineUtil.SideTypes side_id;
     public BlockPos blockPos;
     public MachineUtil.Sides side;
+    public boolean inputDisabled;
+    public boolean outputDisabled;
+
+    public WSideButton(MachineUtil.SideTypes side_id, MachineUtil.Sides side, BlockPos blockPos, boolean inputDisabled, boolean outputDisabled) {
+        this.side_id = side_id;
+        this.side = side;
+        this.blockPos = blockPos;
+        this.inputDisabled = inputDisabled;
+        this.outputDisabled = outputDisabled;
+    }
 
     public WSideButton(MachineUtil.SideTypes side_id, MachineUtil.Sides side, BlockPos blockPos) {
         this.side_id = side_id;
         this.side = side;
         this.blockPos = blockPos;
+        this.inputDisabled = false;
+        this.outputDisabled = false;
     }
 
     @Override
@@ -47,8 +59,20 @@ public class WSideButton extends WWidget {
     @Override
     public InputResult onClick(int x, int y, int button) {
         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-        int button_id = (side_id.ordinal() + 1) % 5;
-        side_id = MachineUtil.SideTypes.values()[button_id];
+
+        if (button == 0) {
+            int button_id = (side_id.ordinal() + 1) % 5;
+            if (inputDisabled && button_id == 1) button_id++;
+            if (outputDisabled && ((button_id == 2) || (button_id == 3))) button_id = 4;
+            side_id = MachineUtil.SideTypes.values()[button_id];
+        } else if (button == 1) {
+            int button_id = (side_id.ordinal() - 1);
+            if (button_id < 0) button_id = 4;
+
+            if (outputDisabled && ((button_id == 2) || (button_id == 3))) button_id = 1;
+            if (inputDisabled && button_id == 1) button_id--;
+            side_id = MachineUtil.SideTypes.values()[button_id];
+        }
 
         PacketByteBuf packet = new PacketByteBuf(Unpooled.buffer());
         packet.writeEnumConstant(side);
