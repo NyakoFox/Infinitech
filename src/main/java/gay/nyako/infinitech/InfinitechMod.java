@@ -12,6 +12,8 @@ import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
+import gay.nyako.infinitech.block.pipe.EnergyPipeIo;
+import gay.nyako.infinitech.block.pipe.EnergyPipePart;
 import gay.nyako.infinitech.block.pipe.ItemPipePart;
 import gay.nyako.infinitech.block.pipe.PipePartItem;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
@@ -86,7 +88,10 @@ public class InfinitechMod implements ModInitializer {
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
 
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
-	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.INVENTORY), h -> new ItemPipePart(ITEM_PIPE_PART, h));
+	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.REDSTONE), h -> new ItemPipePart(ITEM_PIPE_PART, h));
+
+	public static final PartDefinition ENERGY_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "energy_pipe"), EnergyPipePart::new, EnergyPipePart::new);
+	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.REDSTONE), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
 
@@ -116,11 +121,24 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
 
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "energy_pipe"), ENERGY_PIPE_ITEM);
+		ENERGY_PIPE_PART.register();
+
 		ItemStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
 				var itemPipe = multipartBE.getContainer().getFirstPart(ItemPipePart.class);
 				if (itemPipe != null) {
 					return itemPipe.getStorage(side);
+				}
+			}
+			return null;
+		});
+
+		EnergyApi.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
+			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
+				var energyPipe = multipartBE.getContainer().getFirstPart(EnergyPipePart.class);
+				if (energyPipe != null) {
+					return EnergyPipeIo.of(energyPipe, side);
 				}
 			}
 			return null;

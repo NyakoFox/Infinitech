@@ -150,7 +150,10 @@ public abstract class AbstractPipePart extends AbstractPart {
     public VoxelShape getShape() {
         var key = (PipePartModelKey) getModelKey();
         var shapes = key.getConnectionShapes();
-        shapes.add(key.getCenterShape());
+        var centerShape =key.getCenterShape();
+        if (centerShape != null) {
+            shapes.add(centerShape);
+        }
         return shapes.stream().map(PipeShape::toVoxelShape).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
     }
 

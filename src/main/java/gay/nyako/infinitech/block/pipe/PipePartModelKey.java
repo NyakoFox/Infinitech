@@ -21,11 +21,22 @@ public class PipePartModelKey extends PartModelKey {
         this.connections = pipePart.getConnectedSides();
     }
 
+    public boolean isStraight() {
+        if (connections.size() == 2) {
+            var list = connections.stream().toList();
+            return list.get(0) == list.get(1).getOpposite();
+        }
+        return false;
+    }
+
     public double getCenterSize() {
         return 5;
     }
 
     public PipeShape getCenterShape() {
+        if (isStraight()) {
+            return null;
+        }
         var min = 8 - getCenterSize()/2;
         var max = 8 + getCenterSize()/2;
         return PipeShape.fromBlockCoords(null, min, min, min, max, max, max);
@@ -33,7 +44,12 @@ public class PipePartModelKey extends PartModelKey {
 
     public List<PipeShape> getConnectionShapes() {
         if (connections.size() > 0) {
-            return new ArrayList<>(connections.stream().map(PipeShape::of).toList());
+            if (!isStraight()) {
+                return new ArrayList<>(connections.stream().map(PipeShape::of).toList());
+            } else {
+                return new ArrayList<>(connections.stream().map((dir) -> Direction.from(dir.getAxis(), Direction.AxisDirection.POSITIVE))
+                        .distinct().map(PipeShape::ofStraight).toList());
+            }
         } else {
             return new ArrayList<>();
         }

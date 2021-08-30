@@ -14,13 +14,15 @@ import net.minecraft.util.shape.VoxelShape;
 
 public class PipePartModelBaker implements PartModelBaker<PipePartModelKey> {
     public static SpriteIdentifier CONNECTOR_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
-    public static SpriteIdentifier ENERGY_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy"));
 
     @Override
     public void emitQuads(PipePartModelKey key, PartRenderContext ctx) {
         var emitter = ctx.getEmitter();
 
-        key.getCenterShape().emit(emitter, CONNECTOR_SPRITE.getSprite());
+        var centerShape = key.getCenterShape();
+        if (centerShape != null) {
+            centerShape.emit(emitter, CONNECTOR_SPRITE.getSprite());
+        }
         for (PipeShape shape : key.getConnectionShapes()) {
             shape.emit(emitter, key.getSprite());
         }

@@ -25,12 +25,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.List;
 
-public abstract class AbstractStoragePipePart<T> extends AbstractPipePart {
-    public Mode mode;
-
+public abstract class AbstractStoragePipePart<T> extends AbstractIOPipePart {
     public AbstractStoragePipePart(PartDefinition definition, MultipartHolder holder) {
         super(definition, holder);
-        mode = Mode.INSERT;
     }
 
     public abstract Storage<T> getStorage(Direction side);
@@ -70,13 +67,15 @@ public abstract class AbstractStoragePipePart<T> extends AbstractPipePart {
                                     extracted = view.extract(resource, 1, testExtraction);
                                 }
 
-                                long inserted = ownStorage.insert(resource, extracted, transaction);
+                                if (extracted > 0) {
+                                    long inserted = ownStorage.insert(resource, extracted, transaction);
 
-                                if (inserted > 0) {
-                                    view.extract(resource, inserted, transaction);
-                                    transaction.commit();
-                                } else {
-                                    transaction.abort();
+                                    if (inserted > 0) {
+                                        view.extract(resource, inserted, transaction);
+                                        transaction.commit();
+                                    } else {
+                                        transaction.abort();
+                                    }
                                 }
                             }
                         }
@@ -93,23 +92,5 @@ public abstract class AbstractStoragePipePart<T> extends AbstractPipePart {
             return storage.supportsInsertion() || storage.supportsExtraction();
         }
         return false;
-    }
-
-    @Override
-    public ActionResult onUse(PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!player.world.isClient) {
-            switch (this.mode) {
-                case INSERT: this.mode = Mode.EXTRACT; break;
-                case EXTRACT: this.mode = Mode.INSERT; break;
-            }
-            player.sendMessage(new LiteralText("Switched mode: " + mode.toString()), true);
-        }
-        updateConnections();
-        return ActionResult.SUCCESS;
-    }
-
-    public enum Mode {
-        INSERT,
-        EXTRACT
     }
 }

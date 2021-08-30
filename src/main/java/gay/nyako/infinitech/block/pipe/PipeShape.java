@@ -11,13 +11,21 @@ import org.jetbrains.annotations.Nullable;
 
 public record PipeShape(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
     public static PipeShape of(Direction direction) {
-        return switch(direction) {
+        return switch (direction) {
             case NORTH -> fromBlockCoords(direction, 6, 6, 0, 10, 10, 6);
             case EAST -> fromBlockCoords(direction, 10, 6, 6, 16, 10, 10);
             case SOUTH -> fromBlockCoords(direction, 6, 6, 10, 10, 10, 16);
             case WEST -> fromBlockCoords(direction, 0, 6, 6, 6, 10, 10);
             case UP -> fromBlockCoords(direction, 6, 10, 6, 10, 16, 10);
             case DOWN -> fromBlockCoords(direction, 6, 0, 6, 10, 6, 10);
+        };
+    }
+
+    public static PipeShape ofStraight(Direction direction) {
+        return switch (direction) {
+            case NORTH, SOUTH -> fromBlockCoords(direction, 6, 6, 0, 10, 10, 16);
+            case EAST, WEST -> fromBlockCoords(direction, 0, 6, 6, 16, 10, 10);
+            case UP, DOWN -> fromBlockCoords(direction, 6, 0, 6, 10, 16, 10);
         };
     }
 
@@ -58,13 +66,18 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
         var vSize = sprite.getMaxV() - sprite.getMinV();
         var uSize = sprite.getMaxU() - sprite.getMinU();
 
+        var minU = sprite.getMinU();
+        var maxU = direction != null ? sprite.getMaxU() : (sprite.getMinU() + (uSize * small));
+        var minV = direction == null ? sprite.getMinV() : (sprite.getMinV() + (vSize * (1f - (float)(tall ? top : right))));
+        var maxV = direction == null ? sprite.getMinV() + (vSize * big) : (sprite.getMinV() + (vSize * (1f - (float)(tall ? bottom : left))));
+
         emitter.square(face, (float)left, (float)bottom, (float)right, (float)top, (float)depth);
         emitter.spriteBake(0, sprite, MutableQuadView.BAKE_ROTATE_NONE);
         emitter.spriteColor(0, -1, -1, -1, -1);
-        emitter.sprite(tall ? 0 : 3, 0, sprite.getMinU(), sprite.getMinV());
-        emitter.sprite(tall ? 1 : 0, 0, sprite.getMinU(), sprite.getMinV() + (vSize * big));
-        emitter.sprite(tall ? 2 : 1, 0, direction == null ? sprite.getMinU() + (uSize * small) : sprite.getMaxU(), sprite.getMinV() + (vSize * big));
-        emitter.sprite(tall ? 3 : 2, 0, direction == null ? sprite.getMinU() + (uSize * small) : sprite.getMaxU(), sprite.getMinV());
+        emitter.sprite(tall ? 0 : 3, 0, minU, minV);
+        emitter.sprite(tall ? 1 : 0, 0, minU, maxV);
+        emitter.sprite(tall ? 2 : 1, 0, maxU, maxV);
+        emitter.sprite(tall ? 3 : 2, 0, maxU, minV);
         emitter.emit();
     }
 
