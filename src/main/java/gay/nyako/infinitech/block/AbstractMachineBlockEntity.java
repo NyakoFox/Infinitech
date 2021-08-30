@@ -12,10 +12,12 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -25,7 +27,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
     public double transferRate = 1_000_000_000;
     public boolean canInsert = true;
     public boolean canExtract = false;
-    public HashMap<MachineUtil.Sides, MachineUtil.SideTypes> sides = new HashMap<>(); // make enums in a bit
+    public HashMap<MachineUtil.Sides, MachineUtil.SideTypes> sides = new HashMap<>();
 
     protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, double capacity, double transferRate) {
         super(type, pos, state);
@@ -42,6 +44,12 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
     protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, double capacity) {
         super(type, pos, state);
         this.capacity = capacity;
+        sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.UNSET);
+        sides.put(MachineUtil.Sides.BACK,   MachineUtil.SideTypes.UNSET);
+        sides.put(MachineUtil.Sides.LEFT,   MachineUtil.SideTypes.UNSET);
+        sides.put(MachineUtil.Sides.RIGHT,  MachineUtil.SideTypes.UNSET);
+        sides.put(MachineUtil.Sides.TOP,    MachineUtil.SideTypes.UNSET);
+        sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.UNSET);
     }
 
     @Override
@@ -159,6 +167,14 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
     public boolean canTransfer(Direction direction) {
         MachineUtil.Sides side = MachineUtil.DirectionToSide(getCachedState().get(Properties.FACING), direction);
         return (sides.get(side) != MachineUtil.SideTypes.OFF);
+    }
+
+    // Is a side disabled?
+    public boolean isSideDisabled(Direction direction) {
+        Direction baseDir = getCachedState().get(Properties.HORIZONTAL_FACING);
+        MachineUtil.Sides side = MachineUtil.DirectionToSide(baseDir, direction);
+        MachineUtil.SideTypes sideType = sides.get(side);
+        return (sideType == MachineUtil.SideTypes.OFF);
     }
 
     // Attempt transfers based on side

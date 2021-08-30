@@ -192,15 +192,12 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
     }
 
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        if (isSideDisabled(dir)) return false;
         return this.isValid(slot, stack);
     }
 
     public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        if (dir == Direction.DOWN) {
-            return stack.isOf(Items.WATER_BUCKET) || stack.isOf(Items.BUCKET);
-        } else {
-            return true;
-        }
+        return false;
     }
 
     @Override

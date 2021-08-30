@@ -114,7 +114,7 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements BlockEntityC
     @Override
     public void markDirty() {
         super.markDirty();
-        sync();
+        if (!world.isClient()) sync();
     }
 
     @Override
