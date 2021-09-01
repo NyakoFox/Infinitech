@@ -9,6 +9,8 @@ import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
+import gay.nyako.infinitech.block.fluid_tank.FluidTankBlock;
+import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
@@ -19,6 +21,8 @@ import gay.nyako.infinitech.block.pipe.PipePartItem;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
+import gay.nyako.infinitech.storage.FluidInventory;
+import gay.nyako.infinitech.storage.SidedFluidStorage;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
@@ -26,6 +30,8 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
@@ -87,6 +93,13 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
 
+	public static final Block FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
+			.of(Material.GLASS)
+			.strength(2.0f)
+	);
+
+	public static BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BLOCK_ENTITY;
+
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
 	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.REDSTONE), h -> new ItemPipePart(ITEM_PIPE_PART, h));
 
@@ -118,6 +131,10 @@ public class InfinitechMod implements ModInitializer {
 		FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
 		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "cardboard_box_entity"), FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
 
+		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_tank"), new BlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+		FLUID_TANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "fluid_tank_entity"), FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK_BLOCK).build(null));
+
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
 
@@ -130,6 +147,13 @@ public class InfinitechMod implements ModInitializer {
 				if (itemPipe != null) {
 					return itemPipe.getStorage(side);
 				}
+			}
+			return null;
+		});
+
+		FluidStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
+			if (blockEntity instanceof FluidInventory inventory) {
+				return SidedFluidStorage.of(inventory, side);
 			}
 			return null;
 		});
