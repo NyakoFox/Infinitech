@@ -95,9 +95,11 @@ public class InfinitechMod implements ModInitializer {
 
 	public static final Block FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
 			.of(Material.GLASS)
+			.nonOpaque()
 			.strength(2.0f)
+			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
-
+	public static final BlockItem FLUID_TANK_BLOCK_ITEM = new BlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC));
 	public static BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BLOCK_ENTITY;
 
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
@@ -132,7 +134,7 @@ public class InfinitechMod implements ModInitializer {
 		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "cardboard_box_entity"), FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_tank"), new BlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK_ITEM);
 		FLUID_TANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "fluid_tank_entity"), FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK_BLOCK).build(null));
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);

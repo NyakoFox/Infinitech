@@ -1,5 +1,6 @@
 package gay.nyako.infinitech.storage;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.minecraft.fluid.Fluid;
@@ -42,6 +43,7 @@ public interface FluidInventory {
             nbtCompound.putByte("Slot", (byte)i);
             nbtCompound.putString("id", identifier.toString());
             nbtCompound.putLong("amount", slot.amount);
+            nbtCompound.putLong("capacity", slot.capacity);
             if (slot.fluid.hasNbt()) {
                 nbtCompound.put("tag", slot.fluid.copyNbt());
             }
@@ -57,12 +59,20 @@ public interface FluidInventory {
     static void readNbt(NbtCompound nbt, List<FluidSlot> slots) {
         NbtList nbtList = nbt.getList("Fluids", 10);
 
+        var sizeDiff = nbtList.size() - slots.size();
+        if (sizeDiff > 0) {
+            for (int i = 0; i < sizeDiff; i++) {
+                slots.add(FluidSlot.blank(FluidConstants.BUCKET));
+            }
+        }
+
         for(int i = 0; i < nbtList.size(); ++i) {
             NbtCompound nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
             if (j >= 0 && j < slots.size()) {
                 var id = nbtCompound.getString("id");
                 var amount = nbtCompound.getLong("amount");
+                var capacity = nbtCompound.getLong("capacity");
 
                 var fluid = Registry.FLUID.get(new Identifier(id));
                 FluidVariant variant;
@@ -73,10 +83,14 @@ public interface FluidInventory {
                 }
 
                 var slot = slots.get(j);
-                slot.fluid = variant;
-                slot.amount = amount;
+                if (slot != null) {
+                    slot.fluid = variant;
+                    slot.amount = amount;
+                    slot.capacity = capacity;
+                } else {
+                    slots.set(j, new FluidSlot(variant, amount, capacity));
+                }
             }
         }
-
     }
 }
