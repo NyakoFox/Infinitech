@@ -1,5 +1,6 @@
 package gay.nyako.infinitech.block.fluid_tank;
 
+import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -22,6 +23,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -67,16 +69,16 @@ public class FluidTankBlock extends BlockWithEntity {
                 ResourceAmount resourceAmount = StorageUtil.findExtractableContent(itemStorage,transaction);
                 if (resourceAmount != null) {
                     soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().getBucketFillSound();
-                }
 
-                var inserted = StorageUtil.move(itemStorage, ownStorage, variant -> true, FluidConstants.BUCKET, transaction);
+                    var inserted = StorageUtil.move(itemStorage, ownStorage, variant -> true, resourceAmount.amount(), transaction);
 
-                if (inserted > 0) {
-                    if (soundEvent.isPresent()) {
-                        world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                    if (inserted > 0) {
+                        if (soundEvent.isPresent()) {
+                            world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                        }
+                        transaction.commit();
+                        return ActionResult.SUCCESS;
                     }
-                    transaction.commit();
-                    return ActionResult.SUCCESS;
                 }
             }
 
@@ -85,16 +87,16 @@ public class FluidTankBlock extends BlockWithEntity {
                 ResourceAmount resourceAmount = StorageUtil.findExtractableContent(ownStorage,transaction);
                 if (resourceAmount != null) {
                     soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().getBucketFillSound();
-                }
 
-                var extracted = StorageUtil.move(ownStorage, itemStorage, variant -> true, FluidConstants.BUCKET, transaction);
+                    var extracted = StorageUtil.move(ownStorage, itemStorage, variant -> true, resourceAmount.amount(), transaction);
 
-                if (extracted > 0) {
-                    if (soundEvent.isPresent()) {
-                        world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                    if (extracted > 0) {
+                        if (soundEvent.isPresent()) {
+                            world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                        }
+                        transaction.commit();
+                        return ActionResult.SUCCESS;
                     }
-                    transaction.commit();
-                    return ActionResult.SUCCESS;
                 }
             }
         }
