@@ -3,6 +3,7 @@
     "block.infinitech.conveyor_belt": "Conveyor Belt",
     "block.infinitech.cardboard_box": "Cardboard Box",
     "block.infinitech.fluid_tank": "Fluid Tank",
-	"container.infinitech.cardboard_box": "Cardboard Box",
+    "block.infinitech.power_bank": "Power Bank",
+    "container.infinitech.cardboard_box": "Cardboard Box",
     "item.infinitech.item_pipe": "Item Pipe (WILL BREAK UR WORLD)"
 }
