@@ -1,6 +1,7 @@
 package gay.nyako.infinitech.block.fluid_tank;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.InfinitechModelProvider;
 import gay.nyako.infinitech.storage.FluidInventory;
@@ -16,10 +17,7 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.helper.ColorHelper;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.fabricmc.fabric.impl.renderer.RendererAccessImpl;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.BakedQuad;
@@ -53,7 +51,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         transformation.getTransformation(mode).apply(false, matrices);*/
 
         var mesh = InfinitechModelProvider.FLUID_TANK_MODEL.mesh;
-        renderMesh(mesh, matrices, vertexConsumers.getBuffer(RenderLayer.getCutout()), light, overlay);
+        renderMesh(mesh, matrices, vertexConsumers.getBuffer(RenderLayers.getItemLayer(stack, true)), light, overlay);
 
         if (stack.hasNbt()) {
             var nbt = stack.getNbt();
@@ -82,6 +80,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         var sprite = handler.getSprite(variant);
         var color = handler.getColor(variant, view, pos);
         var flipped = handler.fillsFromTop(variant);
+        var luminance = variant.getFluid().getDefaultState().getBlockState().getLuminance();
 
         var renderer = RendererAccessImpl.INSTANCE.getRenderer();
         var consumer = vertexConsumers.getBuffer(RenderLayer.getTranslucent());
@@ -100,7 +99,8 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
 
         var mesh = builder.build();
 
-        renderMesh(mesh, matrices, consumer, 15728880, overlay);
+        var newLight = (light & 0xFFFF_0000) | (Math.max((light >> 4) & 0xF, luminance) << 4);
+        renderMesh(mesh, matrices, consumer, newLight, overlay);
 
         matrices.pop();
     }

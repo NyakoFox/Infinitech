@@ -31,6 +31,16 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
         return (float)slot.amount / slot.capacity;
     }
 
+    public void updateLuminance() {
+        var variant = getStoredVariant();
+        var luminance = variant.isBlank() ? 0 : variant.getFluid().getDefaultState().getBlockState().getLuminance();
+
+        var state = world.getBlockState(pos);
+        if (state.get(FluidTankBlock.LUMINANCE).intValue() != luminance) {
+            world.setBlockState(pos, state.with(FluidTankBlock.LUMINANCE, luminance));
+        }
+    }
+
     public FluidVariant getStoredVariant() {
         return getFluidSlot(0).fluid;
     }
@@ -59,6 +69,7 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
     public void markDirty() {
         super.markDirty();
         sync();
+        updateLuminance();
     }
 
     @Override

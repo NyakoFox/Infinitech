@@ -75,7 +75,7 @@ public class FluidTankModel implements UnbakedModel, BakedModel, FabricBakedMode
 
     @Override
     public boolean isSideLit() {
-        return false;
+        return true;
     }
 
     @Override

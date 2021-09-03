@@ -96,6 +96,7 @@ public class InfinitechMod implements ModInitializer {
 	public static final Block FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
 			.of(Material.GLASS)
 			.nonOpaque()
+			.luminance(FluidTankBlock::getLuminance)
 			.strength(2.0f)
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
