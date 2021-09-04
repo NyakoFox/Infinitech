@@ -43,6 +43,8 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
         canExtract = true;
     }
 
+
+
     @Override
     public double insert(double maxAmount, Simulation simulation) {
         double returnValue = super.insert(maxAmount,simulation);
@@ -82,5 +84,18 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
     public NbtCompound toClientTag(NbtCompound tag) {
         tag.putDouble("Energy", this.energy);
         return tag;
+    }
+
+    @Override
+    public void readNbt(NbtCompound nbt) {
+        super.readNbt(nbt);
+        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int)(((float) energy / 2_000_000f) * 10)));
+    }
+
+    @Override
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        nbt = super.writeNbt(nbt);
+        nbt.putFloat("percentage",((float) energy / 2_000_000f));
+        return nbt;
     }
 }

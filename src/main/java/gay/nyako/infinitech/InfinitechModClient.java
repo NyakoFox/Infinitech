@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegi
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
+import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
@@ -43,5 +44,8 @@ public class InfinitechModClient implements ClientModInitializer {
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/fluid_tank"));
         });
+
+        FabricModelPredicateProviderRegistry.register(new Identifier(InfinitechMod.MOD_ID, "percentage"), (stack, world, entity, i) ->
+                stack.getOrCreateSubNbt("BlockEntityTag").getFloat("percentage"));
     }
 }

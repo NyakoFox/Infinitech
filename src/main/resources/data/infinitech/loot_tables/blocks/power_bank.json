@@ -6,6 +6,29 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "SideConfiguration",
+                  "target": "BlockEntityTag.SideConfiguration",
+                  "op": "replace"
+                },
+                {
+                  "source": "Energy",
+                  "target": "BlockEntityTag.Energy",
+                  "op": "replace"
+                },
+                {
+                  "source": "percentage",
+                  "target": "BlockEntityTag.percentage",
+                  "op": "replace"
+                }
+              ]
+            }
+          ],
           "name": "infinitech:power_bank"
         }
       ],

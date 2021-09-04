@@ -13,10 +13,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -63,17 +65,17 @@ public class FluidTankBlock extends BlockWithEntity {
         var ownStorage = FluidStorage.SIDED.find(world, pos, hit.getSide());
         if (itemStorage != null && ownStorage != null) {
             try (Transaction transaction = Transaction.openOuter()) {
-                Optional<SoundEvent> soundEvent = Optional.empty();
-                ResourceAmount resourceAmount = StorageUtil.findExtractableContent(itemStorage,transaction);
-                if (resourceAmount != null) {
-                    soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().getBucketFillSound();
+                SoundEvent soundEvent = null;
+                FluidVariant fluidVariant = StorageUtil.findExtractableResource(itemStorage,transaction);
+                if (fluidVariant != null) {
+                    soundEvent = fluidVariant.getFluid().isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
                 }
 
                 var inserted = StorageUtil.move(itemStorage, ownStorage, variant -> true, FluidConstants.BUCKET, transaction);
 
                 if (inserted > 0) {
-                    if (soundEvent.isPresent()) {
-                        world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                    if (soundEvent != null) {
+                        player.playSound(soundEvent,SoundCategory.BLOCKS, 1f,1f);
                     }
                     transaction.commit();
                     return ActionResult.SUCCESS;
@@ -82,16 +84,16 @@ public class FluidTankBlock extends BlockWithEntity {
 
             try (Transaction transaction = Transaction.openOuter()) {
                 Optional<SoundEvent> soundEvent = Optional.empty();
-                ResourceAmount resourceAmount = StorageUtil.findExtractableContent(ownStorage,transaction);
-                if (resourceAmount != null) {
-                    soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().getBucketFillSound();
+                FluidVariant fluidVariant = StorageUtil.findExtractableResource(ownStorage,transaction);
+                if (fluidVariant != null) {
+                    soundEvent = fluidVariant.getFluid().getBucketFillSound();
                 }
 
                 var extracted = StorageUtil.move(ownStorage, itemStorage, variant -> true, FluidConstants.BUCKET, transaction);
 
                 if (extracted > 0) {
                     if (soundEvent.isPresent()) {
-                        world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                        player.playSound(soundEvent.get(),SoundCategory.BLOCKS,1f,1f);
                     }
                     transaction.commit();
                     return ActionResult.SUCCESS;

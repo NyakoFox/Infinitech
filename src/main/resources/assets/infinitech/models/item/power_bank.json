@@ -1,3 +1,65 @@
 {
-    "parent": "infinitech:block/power_bank_bar_0"
+    "parent": "infinitech:block/power_bank_bar_0",
+    "overrides": [
+        {
+            "predicate": {
+                "infinitech:percentage": 0.1
+            },
+            "model": "infinitech:block/power_bank_bar_1"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.2
+            },
+            "model": "infinitech:block/power_bank_bar_2"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.3
+            },
+            "model": "infinitech:block/power_bank_bar_3"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.4
+            },
+            "model": "infinitech:block/power_bank_bar_4"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.5
+            },
+            "model": "infinitech:block/power_bank_bar_5"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.6
+            },
+            "model": "infinitech:block/power_bank_bar_6"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.7
+            },
+            "model": "infinitech:block/power_bank_bar_7"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.8
+            },
+            "model": "infinitech:block/power_bank_bar_8"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 0.9
+            },
+            "model": "infinitech:block/power_bank_bar_9"
+        },
+        {
+            "predicate": {
+                "infinitech:percentage": 1
+            },
+            "model": "infinitech:block/power_bank_bar_10"
+        }
+    ]
 }
