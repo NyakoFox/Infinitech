@@ -1,5 +1,6 @@
 package gay.nyako.infinitech.block.fluid_tank;
 
+import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -24,6 +25,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -65,38 +67,36 @@ public class FluidTankBlock extends BlockWithEntity {
         var ownStorage = FluidStorage.SIDED.find(world, pos, hit.getSide());
         if (itemStorage != null && ownStorage != null) {
             try (Transaction transaction = Transaction.openOuter()) {
-                SoundEvent soundEvent = null;
-                FluidVariant fluidVariant = StorageUtil.findExtractableResource(itemStorage,transaction);
-                if (fluidVariant != null) {
-                    soundEvent = fluidVariant.getFluid().isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
-                }
+                SoundEvent soundEvent;
+                ResourceAmount resourceAmount = StorageUtil.findExtractableContent(itemStorage,transaction);
+                if (resourceAmount != null) {
+                    soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
+                    var inserted = StorageUtil.move(itemStorage, ownStorage, variant -> true, resourceAmount.amount(), transaction);
 
-                var inserted = StorageUtil.move(itemStorage, ownStorage, variant -> true, FluidConstants.BUCKET, transaction);
-
-                if (inserted > 0) {
-                    if (soundEvent != null) {
-                        player.playSound(soundEvent,SoundCategory.BLOCKS, 1f,1f);
+                    if (inserted > 0) {
+                        if (soundEvent != null) {
+                            player.playSound(soundEvent,SoundCategory.BLOCKS, 1f,1f);
+                        }
+                        transaction.commit();
+                        return ActionResult.SUCCESS;
                     }
-                    transaction.commit();
-                    return ActionResult.SUCCESS;
                 }
             }
 
             try (Transaction transaction = Transaction.openOuter()) {
                 Optional<SoundEvent> soundEvent = Optional.empty();
-                FluidVariant fluidVariant = StorageUtil.findExtractableResource(ownStorage,transaction);
-                if (fluidVariant != null) {
-                    soundEvent = fluidVariant.getFluid().getBucketFillSound();
-                }
-
-                var extracted = StorageUtil.move(ownStorage, itemStorage, variant -> true, FluidConstants.BUCKET, transaction);
-
-                if (extracted > 0) {
-                    if (soundEvent.isPresent()) {
-                        player.playSound(soundEvent.get(),SoundCategory.BLOCKS,1f,1f);
+                ResourceAmount resourceAmount = StorageUtil.findExtractableContent(ownStorage,transaction);
+                if (resourceAmount != null) {
+                    soundEvent = ((FluidVariant) resourceAmount.resource()).getFluid().getBucketFillSound();
+                    var extracted = StorageUtil.move(ownStorage, itemStorage, variant -> true, resourceAmount.amount(), transaction);
+                    if (extracted > 0) {
+                        if (soundEvent.isPresent()) {
+                            player.playSound(soundEvent.get(),SoundCategory.BLOCKS,1f,1f);
+                            world.playSound(pos.getX(), pos.getY(), pos.getZ(), soundEvent.get(), SoundCategory.BLOCKS, 1f, 1f, true);
+                        }
+                        transaction.commit();
+                        return ActionResult.SUCCESS;
                     }
-                    transaction.commit();
-                    return ActionResult.SUCCESS;
                 }
             }
         }

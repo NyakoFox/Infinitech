@@ -21,11 +21,14 @@ public class SidedFluidStorage extends CombinedStorage<FluidVariant, SidedFluidS
         return WRAPPERS.computeIfAbsent(context, ctx -> new SidedFluidStorage(inventory, direction));
     }
 
+    protected FluidInventory inventory;
+
     public SidedFluidStorage(FluidInventory inventory, Direction direction) {
         super(createWrappers(inventory, direction));
+        this.inventory = inventory;
     }
 
-    private static List<SidedFluidSlotWrapper> createWrappers(FluidInventory inventory, Direction direction) {
+    public static List<SidedFluidSlotWrapper> createWrappers(FluidInventory inventory, Direction direction) {
         var slots = inventory.getAvailableFluidSlots(direction);
         var wrappers = Lists.<SidedFluidSlotWrapper>newArrayList();
         for (int i = 0; i < slots.length; i++) {

@@ -11,6 +11,7 @@ import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankBlock;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockEntity;
+import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockItem;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
@@ -22,6 +23,8 @@ import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
 import gay.nyako.infinitech.storage.FluidInventory;
+import gay.nyako.infinitech.storage.FluidStoringBlockItem;
+import gay.nyako.infinitech.storage.FluidStoringBlockItemStorage;
 import gay.nyako.infinitech.storage.SidedFluidStorage;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -44,7 +47,6 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import org.apache.logging.log4j.Level;
@@ -93,14 +95,14 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
 
-	public static final Block FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
+	public static final FluidTankBlock FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
 			.of(Material.GLASS)
 			.nonOpaque()
 			.luminance(FluidTankBlock::getLuminance)
 			.strength(2.0f)
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
-	public static final BlockItem FLUID_TANK_BLOCK_ITEM = new BlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC));
+	public static final BlockItem FLUID_TANK_BLOCK_ITEM = new FluidTankBlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC));
 	public static BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BLOCK_ENTITY;
 
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
@@ -157,6 +159,12 @@ public class InfinitechMod implements ModInitializer {
 		FluidStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof FluidInventory inventory) {
 				return SidedFluidStorage.of(inventory, side);
+			}
+			return null;
+		});
+		FluidStorage.ITEM.registerFallback((itemStack, context) -> {
+			if (itemStack.getItem() instanceof FluidStoringBlockItem fluidItem) {
+				return new FluidStoringBlockItemStorage(fluidItem, itemStack, context);
 			}
 			return null;
 		});
