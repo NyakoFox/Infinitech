@@ -8,9 +8,10 @@ import alexiil.mc.lib.net.*;
 import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
 import net.minecraft.client.util.SpriteIdentifier;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -20,13 +21,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class AbstractPipePart extends AbstractPart {
+public abstract class AbstractPipePart extends AbstractPart implements PipeShapeContext {
     public static final ParentNetIdSingle<AbstractPipePart> NET_PIPE;
     public static final NetIdDataK<AbstractPipePart> CONNECTION_DATA;
 
     static {
         NET_PIPE = NET_ID.subType(AbstractPipePart.class, InfinitechMod.MOD_ID + ":pipe");
-        CONNECTION_DATA = NET_PIPE.idData("pipe_connection_data").setReceiver(AbstractPipePart::receiveConnectionData);
+        CONNECTION_DATA = NET_PIPE.idData("pipe_connection_data").toClientOnly().setReceiver(AbstractPipePart::receiveConnectionData);
     }
 
     protected Set<Direction> connectedSides;
@@ -41,9 +42,18 @@ public abstract class AbstractPipePart extends AbstractPart {
         this.connections = new Hashtable<>();
     }
 
-    public void createFromNbt(PartDefinition definition, MultipartHolder holder, NbtCompound nbt) { }
+    public void createFromNbt(PartDefinition definition, MultipartHolder holder, NbtCompound nbt) {
+        if (nbt.contains("Connections")) {
+            var list = nbt.getList("Connections", NbtElement.STRING_TYPE);
+            for (var dirStr : list) {
+                connectedSides.add(Direction.byName(dirStr.asString()));
+            }
+        }
+    }
 
-    public void createFromBuffer(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) { }
+    public void createFromBuffer(PartDefinition definition, MultipartHolder holder, NetByteBuf buffer, IMsgReadCtx ctx) {
+        receiveConnectionData(buffer, ctx);
+    }
 
     @Override
     public void onAdded(MultipartEventBus bus) {
@@ -51,14 +61,16 @@ public abstract class AbstractPipePart extends AbstractPart {
             needsUpdate = true;
         });
         bus.addListener(this, PartTickEvent.class, (event) -> tick());
-        updateConnections();
+        needsUpdate = true;
     }
 
     public void tick() {
-        if (needsUpdate) {
-            updateConnections();
-            syncConnections();
-            needsUpdate = false;
+        if (!holder.getContainer().isClientWorld()) {
+            if (needsUpdate) {
+                updateConnections();
+                syncConnections();
+                needsUpdate = false;
+            }
         }
     }
 
@@ -66,13 +78,22 @@ public abstract class AbstractPipePart extends AbstractPart {
 
     public abstract boolean canConnectTo(PipeConnectionContext context);
 
-    public abstract SpriteIdentifier getSpriteIdentifier();
+    public abstract SpriteIdentifier getSpriteId();
+
+    public abstract SpriteIdentifier getEndSpriteId();
+
+    @Override
+    public abstract PipeTypes getPipeType();
 
     public void updateConnections() {
-        clearConnections();
         var container = holder.getContainer();
         var world = container.getMultipartWorld();
 
+        if (world.isClient) {
+            return;
+        }
+
+        clearConnections();
         for (Direction direction : Direction.values()) {
             var pos = container.getMultipartPos().offset(direction);
 
@@ -88,7 +109,7 @@ public abstract class AbstractPipePart extends AbstractPart {
             }
         }
 
-        world.markDirty(container.getMultipartPos());
+        container.recalculateShape();
     }
 
     protected void syncConnections() {
@@ -116,6 +137,23 @@ public abstract class AbstractPipePart extends AbstractPart {
         return Lists.newArrayList(connections.elements().asIterator());
     }
 
+    @Override
+    public Map<Direction, List<PipeTypes>> getContainerConnections() {
+        var result = new HashMap<Direction, List<PipeTypes>>();
+        for (Direction direction : Direction.values()) {
+            result.put(direction, new ArrayList<>());
+        }
+        var parts = holder.getContainer().getAllParts(part -> part instanceof AbstractPipePart);
+        for (AbstractPart part : parts) {
+            var pipe = (AbstractPipePart) part;
+            var connections = pipe.getConnectedSides();
+            for (var direction : connections) {
+                result.get(direction).add(pipe.getPipeType());
+            }
+        }
+        return result;
+    }
+
     protected void clearConnections() {
         connectedSides.clear();
         pipeConnections.clear();
@@ -128,7 +166,7 @@ public abstract class AbstractPipePart extends AbstractPart {
     }
 
     public List<PipeConnectionContext> getNetworkConnections(Set<BlockPos> checked) {
-        var list = Lists.<PipeConnectionContext>newArrayList();
+        var list = new ArrayList<PipeConnectionContext>();
         var basePos = holder.getContainer().getMultipartPos();
 
         for (Direction direction : connectedSides) {
@@ -146,11 +184,41 @@ public abstract class AbstractPipePart extends AbstractPart {
         return list;
     }
 
+    public List<AbstractPipePart> getNetworkPipes() {
+        return getNetworkPipes(new HashSet<>());
+    }
+
+    public List<AbstractPipePart> getNetworkPipes(Set<BlockPos> checked) {
+        var list = new ArrayList<AbstractPipePart>();
+        var basePos = holder.getContainer().getMultipartPos();
+
+        list.add(this);
+
+        for (Direction direction : connectedSides) {
+            if (checked.contains(basePos.offset(direction))) {
+                continue;
+            }
+            checked.add(basePos.offset(direction));
+            if (pipeConnections.containsKey(direction)) {
+                list.addAll(pipeConnections.get(direction).getNetworkPipes(checked));
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public boolean canOverlapWith(AbstractPart other) {
+        if (other instanceof AbstractPipePart pipe) {
+            return pipe.getPipeType() != getPipeType();
+        }
+        return false;
+    }
+
     @Override
     public VoxelShape getShape() {
-        var key = (PipePartModelKey) getModelKey();
-        var shapes = key.getConnectionShapes();
-        var centerShape =key.getCenterShape();
+        var shapes = PipeShape.getConnectionShapes(this);
+        var centerShape = PipeShape.getCenterShape(this);
         if (centerShape != null) {
             shapes.add(centerShape);
         }
@@ -161,6 +229,34 @@ public abstract class AbstractPipePart extends AbstractPart {
     @Override
     public PartModelKey getModelKey() {
         return new PipePartModelKey(this);
+    }
+
+    @Override
+    public void writeRenderData(NetByteBuf buffer, IMsgWriteCtx ctx) {
+        sendConnectionData(buffer, ctx);
+    }
+
+    @Override
+    public void readRenderData(NetByteBuf buffer, IMsgReadCtx ctx) {
+        receiveConnectionData(buffer, ctx);
+    }
+
+    @Override
+    public void writeCreationData(NetByteBuf buffer, IMsgWriteCtx ctx) {
+        sendConnectionData(buffer, ctx);
+    }
+
+    @Override
+    public NbtCompound toTag() {
+        var nbt = super.toTag();
+
+        var list = new NbtList();
+        for (Direction direction : connectedSides) {
+            list.add(NbtString.of(direction.asString()));
+        }
+        nbt.put("Connections", list);
+
+        return nbt;
     }
 
     public void sendConnectionData(NetByteBuf buffer, IMsgWriteCtx ctx) {
@@ -176,5 +272,8 @@ public abstract class AbstractPipePart extends AbstractPart {
         for (int i = 0; i < size; i++) {
             connectedSides.add(buffer.readEnumConstant(Direction.class));
         }
+        var container = holder.getContainer();
+        container.recalculateShape();
+        container.redrawIfChanged();
     }
 }

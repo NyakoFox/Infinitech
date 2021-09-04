@@ -48,6 +48,10 @@ public class EnergyPipeIo implements EnergyIo {
             toInsert -= perStorage - storage.insert(perStorage, simulation);
         }
 
+        if (simulation.isActing() && toInsert < amount) {
+            pipe.transferCountdown = EnergyPipePart.TRANSFER_TIMER;
+        }
+
         return toInsert;
     }
 

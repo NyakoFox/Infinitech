@@ -5,5 +5,6 @@
     "block.infinitech.fluid_tank": "Fluid Tank",
     "block.infinitech.power_bank": "Power Bank",
     "container.infinitech.cardboard_box": "Cardboard Box",
-    "item.infinitech.item_pipe": "Item Pipe (WILL BREAK UR WORLD)"
+    "item.infinitech.item_pipe": "Item Pipe",
+    "item.infinitech.energy_pipe": "Energy Pipe"
 }

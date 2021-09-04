@@ -19,12 +19,12 @@ public class PipePartModelBaker implements PartModelBaker<PipePartModelKey> {
     public void emitQuads(PipePartModelKey key, PartRenderContext ctx) {
         var emitter = ctx.getEmitter();
 
-        var centerShape = key.getCenterShape();
+        var centerShape = PipeShape.getCenterShape(key);
         if (centerShape != null) {
-            centerShape.emit(emitter, CONNECTOR_SPRITE.getSprite());
+            centerShape.emit(emitter, CONNECTOR_SPRITE.getSprite(), null);
         }
-        for (PipeShape shape : key.getConnectionShapes()) {
-            shape.emit(emitter, key.getSprite());
+        for (PipeShape shape : PipeShape.getConnectionShapes(key)) {
+            shape.emit(emitter, key.getSprite(), key.getEndSprite());
         }
     }
 }

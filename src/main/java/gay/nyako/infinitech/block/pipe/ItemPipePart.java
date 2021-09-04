@@ -13,12 +13,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 public class ItemPipePart extends AbstractStoragePipePart<ItemVariant> {
     public static SpriteIdentifier ITEM_PIPE_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/item"));
+    public static SpriteIdentifier ITEM_PIPE_END_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/item_end"));
 
     public ItemPipePart(PartDefinition definition, MultipartHolder holder) {
         super(definition, holder);
@@ -50,12 +52,27 @@ public class ItemPipePart extends AbstractStoragePipePart<ItemVariant> {
     }
 
     @Override
-    public SpriteIdentifier getSpriteIdentifier() {
+    public SpriteIdentifier getSpriteId() {
         return ITEM_PIPE_SPRITE;
+    }
+
+    @Override
+    public SpriteIdentifier getEndSpriteId() {
+        return ITEM_PIPE_END_SPRITE;
+    }
+
+    @Override
+    public PipeTypes getPipeType() {
+        return PipeTypes.ITEM;
     }
 
     @Override
     protected BlockState getClosestBlockState() {
         return Blocks.GLASS.getDefaultState();
+    }
+
+    @Override
+    public ItemStack getPickStack() {
+        return InfinitechMod.ITEM_PIPE_ITEM.getDefaultStack();
     }
 }

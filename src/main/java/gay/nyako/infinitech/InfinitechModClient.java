@@ -38,8 +38,12 @@ public class InfinitechModClient implements ClientModInitializer {
         });
 
         ClientSpriteRegistryCallback.event(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE).register((atlasTexture, registry) -> {
-            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy_on"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy_off"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy_on_end"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy_off_end"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/item"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/item_end"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/fluid_tank"));
         });

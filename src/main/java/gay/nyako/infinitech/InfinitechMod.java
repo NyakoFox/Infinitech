@@ -106,10 +106,10 @@ public class InfinitechMod implements ModInitializer {
 	public static BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BLOCK_ENTITY;
 
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
-	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.REDSTONE), h -> new ItemPipePart(ITEM_PIPE_PART, h));
+	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new ItemPipePart(ITEM_PIPE_PART, h));
 
 	public static final PartDefinition ENERGY_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "energy_pipe"), EnergyPipePart::new, EnergyPipePart::new);
-	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.REDSTONE), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
+	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
 
