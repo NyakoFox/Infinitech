@@ -105,6 +105,9 @@ public class InfinitechMod implements ModInitializer {
 	public static final PartDefinition ITEM_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "item_pipe"), ItemPipePart::new, ItemPipePart::new);
 	public static final Item ITEM_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new ItemPipePart(ITEM_PIPE_PART, h));
 
+	public static final PartDefinition FLUID_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "fluid_pipe"), FluidPipePart::new, FluidPipePart::new);
+	public static final Item FLUID_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new FluidPipePart(FLUID_PIPE_PART, h));
+
 	public static final PartDefinition ENERGY_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "energy_pipe"), EnergyPipePart::new, EnergyPipePart::new);
 	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
@@ -138,6 +141,9 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
 
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_pipe"), FLUID_PIPE_ITEM);
+		FLUID_PIPE_PART.register();
+
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "energy_pipe"), ENERGY_PIPE_ITEM);
 		ENERGY_PIPE_PART.register();
 
@@ -154,6 +160,12 @@ public class InfinitechMod implements ModInitializer {
 		FluidStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof FluidInventory inventory) {
 				return SidedFluidStorage.of(inventory, side);
+			}
+			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
+				var fluidPipe = multipartBE.getContainer().getFirstPart(FluidPipePart.class);
+				if (fluidPipe != null) {
+					return fluidPipe.getStorage(side);
+				}
 			}
 			return null;
 		});
