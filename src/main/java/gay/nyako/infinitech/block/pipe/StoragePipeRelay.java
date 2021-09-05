@@ -1,15 +1,10 @@
 package gay.nyako.infinitech.block.pipe;
 
 import com.google.common.collect.MapMaker;
-import gay.nyako.infinitech.InfinitechMod;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.InsertionOnlyStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.util.math.Direction;
-import org.apache.logging.log4j.Level;
 
 import java.util.Map;
 

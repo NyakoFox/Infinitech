@@ -46,9 +46,9 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modApi include("dev.technici4n:FastTransferLib:${project.ftl_version}")
 	modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
 	modApi include("alexiil.mc.lib:libmultipart-all:${project.libmultipart_version}")
+	modApi include("teamreborn:energy:${project.energy_version}")
 }
 
 processResources {

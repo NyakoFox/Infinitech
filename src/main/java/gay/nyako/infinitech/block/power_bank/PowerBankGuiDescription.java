@@ -3,12 +3,10 @@ package gay.nyako.infinitech.block.power_bank;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.WEnergyBar;
 import io.github.cottonmc.cotton.gui.SyncedGuiDescription;
-import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 public class PowerBankGuiDescription extends SyncedGuiDescription {

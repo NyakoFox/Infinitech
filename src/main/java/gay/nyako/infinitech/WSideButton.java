@@ -15,7 +15,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class WSideButton extends WWidget {
     private static final Identifier BUTTONS = new Identifier(InfinitechMod.MOD_ID, "textures/gui/sidebuttons.png");

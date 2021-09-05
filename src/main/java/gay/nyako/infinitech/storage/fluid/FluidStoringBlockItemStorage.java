@@ -1,18 +1,13 @@
-package gay.nyako.infinitech.storage;
+package gay.nyako.infinitech.storage.fluid;
 
 import com.google.common.collect.Lists;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Direction;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class FluidStoringBlockItemStorage extends CombinedStorage<FluidVariant, FluidStoringBlockItemSlotWrapper> {

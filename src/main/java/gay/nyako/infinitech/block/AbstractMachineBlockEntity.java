@@ -1,8 +1,6 @@
 package gay.nyako.infinitech.block;
 
-import dev.technici4n.fasttransferlib.api.Simulation;
-import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
-import dev.technici4n.fasttransferlib.api.energy.EnergyPreconditions;
+import gay.nyako.infinitech.storage.energy.MachineEnergyStorage;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -12,27 +10,27 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
-public abstract class AbstractMachineBlockEntity extends BlockEntity implements BlockEntityClientSerializable, EnergyIo {
-    public double energy = 0;
-    public double capacity;
-    public double transferRate = 1_000_000_000;
+public abstract class AbstractMachineBlockEntity extends BlockEntity implements BlockEntityClientSerializable {
+    public long energy = 0;
+    public long capacity;
+    public long transferRate = 1_000_000_000;
     public boolean canInsert = true;
     public boolean canExtract = false;
+    public MachineEnergyStorage energyStorage;
     public HashMap<MachineUtil.Sides, MachineUtil.SideTypes> sides = new HashMap<>();
 
-    protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, double capacity, double transferRate) {
+    protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long capacity, long transferRate) {
         super(type, pos, state);
         this.capacity = capacity;
         this.transferRate = transferRate;
+        this.energyStorage = new MachineEnergyStorage(this);
         sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.UNSET);
         sides.put(MachineUtil.Sides.BACK,   MachineUtil.SideTypes.UNSET);
         sides.put(MachineUtil.Sides.LEFT,   MachineUtil.SideTypes.UNSET);
@@ -41,74 +39,13 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
         sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.UNSET);
     }
 
-    protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, double capacity) {
-        super(type, pos, state);
-        this.capacity = capacity;
-        sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.UNSET);
-        sides.put(MachineUtil.Sides.BACK,   MachineUtil.SideTypes.UNSET);
-        sides.put(MachineUtil.Sides.LEFT,   MachineUtil.SideTypes.UNSET);
-        sides.put(MachineUtil.Sides.RIGHT,  MachineUtil.SideTypes.UNSET);
-        sides.put(MachineUtil.Sides.TOP,    MachineUtil.SideTypes.UNSET);
-        sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.UNSET);
-    }
-
-    @Override
-    public double getEnergy() {
-        return energy;
-    }
-
-    @Override
-    public double getEnergyCapacity() {
-        return capacity;
-    }
-
-    @Override
-    public boolean supportsInsertion() {
-        return canInsert;
-    }
-
-    @Override
-    public double insert(double maxAmount, Simulation simulation) {
-        EnergyPreconditions.notNegative(maxAmount);
-        double amountInserted = Math.min(maxAmount, capacity - energy);
-
-        if (amountInserted > 1e-9) {
-            if (simulation.isActing()) {
-                energy += amountInserted;
-                markDirty();
-            }
-
-            return maxAmount - amountInserted;
-        }
-
-        return maxAmount;
-    }
-
-    @Override
-    public boolean supportsExtraction() {
-        return canExtract;
-    }
-
-    @Override
-    public double extract(double maxAmount, Simulation simulation) {
-        EnergyPreconditions.notNegative(maxAmount);
-        double amountExtracted = Math.min(maxAmount, energy);
-
-        if (amountExtracted > 1e-9) {
-            if (simulation.isActing()) {
-                energy -= amountExtracted;
-                markDirty();
-            }
-
-            return amountExtracted;
-        }
-
-        return 0;
+    protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long capacity) {
+        this(type, pos, state, capacity, 1_000_000_000);
     }
 
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
-        this.energy = nbt.getDouble("Energy");
+        this.energy = nbt.getLong("Energy");
 
         NbtCompound directionCompound = nbt.getCompound("SideConfiguration");
         sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.values()[directionCompound.getInt("FRONT" )]);
@@ -121,7 +58,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
 
     public NbtCompound writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
-        nbt.putDouble("Energy", this.energy);
+        nbt.putLong("Energy", this.energy);
 
         NbtCompound directionCompound = new NbtCompound();
         directionCompound.putInt("FRONT",  sides.get(MachineUtil.Sides.FRONT ).ordinal());

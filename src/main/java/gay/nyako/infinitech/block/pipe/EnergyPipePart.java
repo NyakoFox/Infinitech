@@ -1,27 +1,21 @@
 package gay.nyako.infinitech.block.pipe;
 
-import alexiil.mc.lib.multipart.api.MultipartContainer;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
-import alexiil.mc.lib.multipart.api.MultipartUtil;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
 import alexiil.mc.lib.net.*;
-import dev.technici4n.fasttransferlib.api.Simulation;
-import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
-import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
 import gay.nyako.infinitech.InfinitechMod;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +36,7 @@ public class EnergyPipePart extends AbstractIOPipePart {
         ENERGY_TRANSFER_DATA = NET_ENERGY_PIPE.idData("energy_transferring_data").toClientOnly().setReceiver(EnergyPipePart::receiveTransferData);
     }
 
-    public double transferRate = 1_000;
+    public long transferRate = 1_000;
     public int transferCountdown = 0;
 
     public EnergyPipePart(PartDefinition definition, MultipartHolder holder) {
@@ -59,13 +53,13 @@ public class EnergyPipePart extends AbstractIOPipePart {
         createFromBuffer(definition, holder, buffer, ctx);
     }
 
-    public List<EnergyIo> getConnectedStorages(@Nullable Direction ignoreSide) {
+    public List<EnergyStorage> getConnectedStorages(@Nullable Direction ignoreSide) {
         var checked = new HashSet<BlockPos>();
         if (ignoreSide != null) {
             checked.add(holder.getContainer().getMultipartPos().offset(ignoreSide));
         }
         return getNetworkConnections(checked).stream()
-                .map((ctx) -> ctx.lookup(EnergyApi.SIDED))
+                .map((ctx) -> ctx.lookup(EnergyStorage.SIDED))
                 .filter((storage) -> storage != null && storage.supportsInsertion()).toList();
     }
 
@@ -85,16 +79,22 @@ public class EnergyPipePart extends AbstractIOPipePart {
         if (!client && mode == Mode.EXTRACT) {
             var connections = getConnections();
             for (PipeConnectionContext context : connections) {
-                var storage = context.lookup(EnergyApi.SIDED);
-                var ownStorage = EnergyPipeIo.of(this, context.direction());
+                var storage = context.lookup(EnergyStorage.SIDED);
+                var ownStorage = EnergyPipeStorage.of(this, context.direction());
                 if (storage.supportsExtraction()) {
-                    var extracted = transferRate - storage.extract(transferRate, Simulation.SIMULATE);
+                    try (Transaction transaction = Transaction.openOuter()) {
+                        long extracted;
+                        try (Transaction testExtraction = transaction.openNested()) {
+                            extracted = storage.extract(transferRate, testExtraction);
+                        }
 
-                    if (extracted > 0) {
-                        var inserted = extracted - ownStorage.insert(extracted, Simulation.ACT);
+                        if (extracted > 0) {
+                            var inserted = ownStorage.insert(extracted, transaction);
 
-                        if (inserted > 0) {
-                            storage.extract(inserted, Simulation.ACT);
+                            if (inserted > 0) {
+                                storage.extract(inserted, transaction);
+                                transaction.commit();
+                            }
                         }
                     }
                 }
@@ -104,7 +104,7 @@ public class EnergyPipePart extends AbstractIOPipePart {
 
     @Override
     public boolean canConnectTo(PipeConnectionContext context) {
-        var storage = context.lookup(EnergyApi.SIDED);
+        var storage = context.lookup(EnergyStorage.SIDED);
         if (storage != null) {
             return storage.supportsInsertion() || storage.supportsExtraction();
         }

@@ -3,15 +3,11 @@ package gay.nyako.infinitech.block.pipe;
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.MultipartUtil;
-import alexiil.mc.lib.multipart.api.PartDefinition;
-import net.minecraft.client.sound.Sound;
-import net.minecraft.client.sound.SoundManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.ActionResult;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class PipePartItem extends Item {

@@ -1,4 +1,4 @@
-package gay.nyako.infinitech.storage;
+package gay.nyako.infinitech.storage.fluid;
 
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 

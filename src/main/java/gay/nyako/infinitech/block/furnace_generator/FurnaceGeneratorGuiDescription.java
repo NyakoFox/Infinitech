@@ -15,7 +15,6 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
     private static final int INVENTORY_SIZE = 1;

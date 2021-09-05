@@ -1,6 +1,5 @@
 package gay.nyako.infinitech.block.power_bank;
 
-import dev.technici4n.fasttransferlib.api.Simulation;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
@@ -13,11 +12,10 @@ import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.Level;
 
 public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, BlockEntityClientSerializable {
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
@@ -28,7 +26,7 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
 
         @Override
         public void set(int index, int value) {
-            energy = (double) value;
+            energy = value;
         }
 
         @Override
@@ -43,20 +41,10 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
         canExtract = true;
     }
 
-
-
     @Override
-    public double insert(double maxAmount, Simulation simulation) {
-        double returnValue = super.insert(maxAmount,simulation);
-        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int)(((float) energy / 2_000_000f) * 10)));
-        return returnValue;
-    }
-
-    @Override
-    public double extract(double maxAmount, Simulation simulation) {
-        double returnValue = super.extract(maxAmount, simulation);
-        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int)(((float) energy / 2_000_000f) * 10)));
-        return returnValue;
+    public void markDirty() {
+        super.markDirty();
+        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int) (((float) energy / 2_000_000f) * 10)));
     }
 
     @Override
@@ -77,25 +65,12 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
 
     @Override
     public void fromClientTag(NbtCompound tag) {
-        this.energy = tag.getDouble("Energy");
+        this.energy = tag.getLong("Energy");
     }
 
     @Override
     public NbtCompound toClientTag(NbtCompound tag) {
-        tag.putDouble("Energy", this.energy);
+        tag.putLong("Energy", this.energy);
         return tag;
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int)(((float) energy / 2_000_000f) * 10)));
-    }
-
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        nbt = super.writeNbt(nbt);
-        nbt.putFloat("percentage",((float) energy / 2_000_000f));
-        return nbt;
     }
 }

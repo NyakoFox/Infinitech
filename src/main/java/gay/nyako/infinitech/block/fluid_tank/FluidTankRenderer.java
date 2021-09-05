@@ -1,11 +1,9 @@
 package gay.nyako.infinitech.block.fluid_tank;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.InfinitechModelProvider;
-import gay.nyako.infinitech.storage.FluidInventory;
-import gay.nyako.infinitech.storage.FluidSlot;
+import gay.nyako.infinitech.storage.fluid.FluidInventory;
+import gay.nyako.infinitech.storage.fluid.FluidSlot;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
@@ -14,25 +12,18 @@ import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.impl.client.indigo.renderer.helper.ColorHelper;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.fabricmc.fabric.impl.renderer.RendererAccessImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.biome.Biome;
-import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEntity>, BuiltinItemRendererRegistry.DynamicItemRenderer {

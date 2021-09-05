@@ -37,6 +37,11 @@ public class ItemPipePart extends AbstractStoragePipePart<ItemVariant> {
     }
 
     @Override
+    public long getTransferRate() {
+        return 1;
+    }
+
+    @Override
     public Storage<ItemVariant> getStorage(Direction side) {
         return StoragePipeRelay.of(this, side, ItemVariant.blank());
     }

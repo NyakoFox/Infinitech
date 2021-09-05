@@ -2,14 +2,12 @@ package gay.nyako.infinitech.block.fluid_tank;
 
 import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
-import gay.nyako.infinitech.storage.FluidInventory;
-import gay.nyako.infinitech.storage.FluidSlot;
+import gay.nyako.infinitech.storage.fluid.FluidInventory;
+import gay.nyako.infinitech.storage.fluid.FluidSlot;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;

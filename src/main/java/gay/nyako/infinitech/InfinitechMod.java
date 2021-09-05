@@ -2,7 +2,6 @@ package gay.nyako.infinitech;
 
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
-import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.MachineUtil;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
@@ -15,17 +14,14 @@ import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockItem;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
-import gay.nyako.infinitech.block.pipe.EnergyPipeIo;
-import gay.nyako.infinitech.block.pipe.EnergyPipePart;
-import gay.nyako.infinitech.block.pipe.ItemPipePart;
-import gay.nyako.infinitech.block.pipe.PipePartItem;
+import gay.nyako.infinitech.block.pipe.*;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
-import gay.nyako.infinitech.storage.FluidInventory;
-import gay.nyako.infinitech.storage.FluidStoringBlockItem;
-import gay.nyako.infinitech.storage.FluidStoringBlockItemStorage;
-import gay.nyako.infinitech.storage.SidedFluidStorage;
+import gay.nyako.infinitech.storage.fluid.FluidInventory;
+import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
+import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItemStorage;
+import gay.nyako.infinitech.storage.fluid.SidedFluidStorage;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
@@ -52,6 +48,7 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import team.reborn.energy.api.EnergyStorage;
 
 public class InfinitechMod implements ModInitializer {
 	public static Logger LOGGER = LogManager.getLogger();
@@ -124,12 +121,10 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "furnace_generator"), FURNACE_GENERATOR_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "furnace_generator"), new BlockItem(FURNACE_GENERATOR_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		FURNACE_GENERATOR_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "furnace_generator_entity"), FabricBlockEntityTypeBuilder.create(FurnaceGeneratorBlockEntity::new, FURNACE_GENERATOR_BLOCK).build(null));
-		EnergyApi.SIDED.registerSelf(FURNACE_GENERATOR_BLOCK_ENTITY);
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "power_bank"), POWER_BANK_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "power_bank"), new BlockItem(POWER_BANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		POWER_BANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "power_bank_entity"), FabricBlockEntityTypeBuilder.create(PowerBankBlockEntity::new, POWER_BANK_BLOCK).build(null));
-		EnergyApi.SIDED.registerSelf(POWER_BANK_BLOCK_ENTITY);
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "cardboard_box"), CARDBOARD_BOX_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "cardboard_box"), new BlockItem(CARDBOARD_BOX_BLOCK, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
@@ -169,11 +164,13 @@ public class InfinitechMod implements ModInitializer {
 			return null;
 		});
 
-		EnergyApi.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
-			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
+		EnergyStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
+			if (blockEntity instanceof AbstractMachineBlockEntity machine) {
+				return machine.energyStorage;
+			} else if (blockEntity instanceof MultipartBlockEntity multipartBE) {
 				var energyPipe = multipartBE.getContainer().getFirstPart(EnergyPipePart.class);
 				if (energyPipe != null) {
-					return EnergyPipeIo.of(energyPipe, side);
+					return EnergyPipeStorage.of(energyPipe, side);
 				}
 			}
 			return null;

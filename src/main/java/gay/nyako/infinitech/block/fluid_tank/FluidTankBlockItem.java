@@ -1,6 +1,6 @@
 package gay.nyako.infinitech.block.fluid_tank;
 
-import gay.nyako.infinitech.storage.ImplementedFluidStoringBlockItem;
+import gay.nyako.infinitech.storage.fluid.ImplementedFluidStoringBlockItem;
 import net.minecraft.item.BlockItem;
 
 public class FluidTankBlockItem extends BlockItem implements ImplementedFluidStoringBlockItem {

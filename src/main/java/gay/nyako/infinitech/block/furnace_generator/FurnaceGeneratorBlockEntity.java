@@ -1,8 +1,5 @@
 package gay.nyako.infinitech.block.furnace_generator;
 
-import dev.technici4n.fasttransferlib.api.energy.EnergyApi;
-import dev.technici4n.fasttransferlib.api.energy.EnergyIo;
-import dev.technici4n.fasttransferlib.api.energy.EnergyMovement;
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
@@ -19,7 +16,6 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.*;
@@ -32,11 +28,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.EnergyStorageUtil;
 
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory, EnergyIo {
+public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory {
     private static final int[] SLOTS = new int[]{0};
     protected DefaultedList<ItemStack> inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
     private final InventoryStorage storage = InventoryStorage.of(this, null);
@@ -76,7 +74,7 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
                         FurnaceGeneratorBlockEntity.this.fuelTime = value;
                         break;
                     case 2:
-                        FurnaceGeneratorBlockEntity.this.energy = (double) value;
+                        FurnaceGeneratorBlockEntity.this.energy = value;
                 }
 
             }
@@ -134,10 +132,10 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
 
         for (Direction dir : Direction.values()) {
 
-            EnergyIo io = EnergyApi.SIDED.find(world,pos.offset(dir),dir.getOpposite());
+            EnergyStorage storage = EnergyStorage.SIDED.find(world,pos.offset(dir),dir.getOpposite());
 
-            if (io != null) {
-                EnergyMovement.move(blockEntity, io, blockEntity.transferRate);
+            if (storage != null) {
+                EnergyStorageUtil.move(blockEntity.energyStorage, storage, blockEntity.transferRate, null);
             }
         }
 

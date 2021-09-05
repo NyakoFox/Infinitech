@@ -6,14 +6,12 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public record PipeShape(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean endFaces) {
     public static PipeShape of(Direction direction, Vec2f offset, boolean small) {

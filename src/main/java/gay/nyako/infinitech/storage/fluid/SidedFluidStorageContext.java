@@ -1,4 +1,4 @@
-package gay.nyako.infinitech.storage;
+package gay.nyako.infinitech.storage.fluid;
 
 import net.minecraft.util.math.Direction;
 
