@@ -14,6 +14,8 @@ import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockItem;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlock;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
+import gay.nyako.infinitech.block.item_grate.ItemGrateBlock;
+import gay.nyako.infinitech.block.item_grate.ItemGrateBlockEntity;
 import gay.nyako.infinitech.block.pipe.*;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
@@ -60,6 +62,15 @@ public class InfinitechMod implements ModInitializer {
 			.strength(4.0f)
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
+
+	public static final Block ITEM_GRATE_BLOCK = new ItemGrateBlock(FabricBlockSettings
+			.of(Material.METAL)
+			.strength(4.0f)
+			.breakByTool(FabricToolTags.PICKAXES, 1)
+	);
+
+	public static BlockEntityType<ItemGrateBlockEntity> ITEM_GRATE_BLOCK_ENTITY;
+
 	public static final ScreenHandlerType<FurnaceGeneratorGuiDescription> FURNACE_GENERATOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"furnace_generator_gui_description"), (syncId, inventory, buf) -> new FurnaceGeneratorGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos()));
 
 	public static final ScreenHandlerType<PowerBankGuiDescription> POWER_BANK_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(MOD_ID,"power_bank_gui_description"), (syncId, inventory) -> new PowerBankGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY));
@@ -120,6 +131,10 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "conveyor_belt"), CONVEYOR_BELT_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "conveyor_belt"), new BlockItem(CONVEYOR_BELT_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		CONVEYOR_BELT_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "conveyor_belt_entity"), FabricBlockEntityTypeBuilder.create(ConveyorBeltBlockEntity::new, CONVEYOR_BELT_BLOCK).build(null));
+
+		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "item_grate"), ITEM_GRATE_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_grate"), new BlockItem(ITEM_GRATE_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+		ITEM_GRATE_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "item_grate_entity"), FabricBlockEntityTypeBuilder.create(ItemGrateBlockEntity::new, ITEM_GRATE_BLOCK).build(null));
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "furnace_generator"), FURNACE_GENERATOR_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "furnace_generator"), new BlockItem(FURNACE_GENERATOR_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));

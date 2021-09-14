@@ -21,17 +21,24 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
-            return (int) energy;
+            return switch (index) {
+                case 0 -> (int) energy;
+                case 1 -> (int) capacity;
+                default -> 0;
+            };
         }
 
         @Override
         public void set(int index, int value) {
-            energy = value;
+            switch (index) {
+                case 0: energy = value;
+                case 1: capacity = value;
+            }
         }
 
         @Override
         public int size() {
-            return 1;
+            return 2;
         }
     };
 
@@ -41,10 +48,16 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
         canExtract = true;
     }
 
+    public PowerBankBlockEntity(BlockPos pos, BlockState state, long capacity, long transferRate) {
+        super(InfinitechMod.POWER_BANK_BLOCK_ENTITY, pos, state, capacity, transferRate);
+        canInsert = true;
+        canExtract = true;
+    }
+
     @Override
     public void markDirty() {
         super.markDirty();
-        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int) (((float) energy / 2_000_000f) * 10)));
+        world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int) (((float) energy / ((float) capacity)) * 10)));
     }
 
     @Override
