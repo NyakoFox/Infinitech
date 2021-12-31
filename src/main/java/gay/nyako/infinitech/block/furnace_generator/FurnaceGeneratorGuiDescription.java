@@ -53,11 +53,15 @@ public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
         BlockEntity blockEntity = playerInventory.player.world.getBlockEntity(blockPos);
 
         if (blockEntity instanceof AbstractMachineBlockEntity machineBlockEntity) {
-            int fuck = 0;
-            for (MachineUtil.Sides side : MachineUtil.Sides.values()) {
-                fuck += 10;
-                root.add(new WSideButton(machineBlockEntity.sides.get(side), side, blockPos, false, true), fuck, 20, 10, 10);
-            }
+            int xoff = 120;
+            int yoff = 20;
+
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.LEFT  ), MachineUtil.Sides.LEFT,   blockPos, false, true), xoff + 0,  yoff + 10, 10, 10);
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.FRONT ), MachineUtil.Sides.FRONT,  blockPos, false, true), xoff + 10, yoff + 10, 10, 10);
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.RIGHT ), MachineUtil.Sides.RIGHT,  blockPos, false, true), xoff + 20, yoff + 10, 10, 10);
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.TOP   ), MachineUtil.Sides.TOP,    blockPos, false, true), xoff + 10, yoff + 0,  10, 10);
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.BOTTOM), MachineUtil.Sides.BOTTOM, blockPos, false, true), xoff + 10, yoff + 20, 10, 10);
+            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.BACK  ), MachineUtil.Sides.BACK,   blockPos, false, true), xoff + 20, yoff + 20, 10, 10);
         }
 
         root.add(this.createPlayerInventoryPanel(), 0, 65);

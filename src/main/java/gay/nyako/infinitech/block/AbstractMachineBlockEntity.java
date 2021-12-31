@@ -1,6 +1,5 @@
 package gay.nyako.infinitech.block;
 
-import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.storage.energy.MachineEnergyStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -125,6 +124,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity {
 
     // Attempt transfers based on side
     public void attemptSideTransfers(InventoryStorage storage) {
+        if (world.isClient()) return;
         Direction baseDir = getCachedState().get(Properties.HORIZONTAL_FACING);
         for (MachineUtil.Sides side : MachineUtil.Sides.values()) {
             Direction direction = MachineUtil.SideToRelativeDirection(side, baseDir);
