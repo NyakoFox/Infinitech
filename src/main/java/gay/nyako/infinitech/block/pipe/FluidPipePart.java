@@ -20,8 +20,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
 public class FluidPipePart extends AbstractStoragePipePart<FluidVariant> {
-    public static SpriteIdentifier FLUID_PIPE_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/item"));
-    public static SpriteIdentifier FLUID_PIPE_END_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/item_end"));
+    public static SpriteIdentifier FLUID_PIPE_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/fluid"));
+    public static SpriteIdentifier FLUID_PIPE_END_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/fluid_end"));
 
     public FluidPipePart(PartDefinition definition, MultipartHolder holder) {
         super(definition, holder);

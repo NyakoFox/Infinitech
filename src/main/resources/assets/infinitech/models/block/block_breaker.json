@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "": { "all": "infinitech:block/block_breaker" }
+  }
+}

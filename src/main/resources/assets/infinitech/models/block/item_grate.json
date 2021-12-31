@@ -1,4 +1,5 @@
 {
+	"parent": "block/thin_block",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "infinitech:block/item_grate",

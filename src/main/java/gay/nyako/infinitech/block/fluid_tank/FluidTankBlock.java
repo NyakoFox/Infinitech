@@ -3,6 +3,7 @@ package gay.nyako.infinitech.block.fluid_tank;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.ResourceAmount;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -24,7 +25,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Optional;
 
 public class FluidTankBlock extends BlockWithEntity {
@@ -59,9 +59,9 @@ public class FluidTankBlock extends BlockWithEntity {
             return ActionResult.SUCCESS;
         }
 
-        var context = ContainerItemContext.ofPlayerHand(player, hand);
-        var itemStorage = context.find(FluidStorage.ITEM);
-        var ownStorage = FluidStorage.SIDED.find(world, pos, hit.getSide());
+        ContainerItemContext context = ContainerItemContext.ofPlayerHand(player, hand);
+        Storage itemStorage = context.find(FluidStorage.ITEM);
+        Storage ownStorage = FluidStorage.SIDED.find(world, pos, hit.getSide());
         if (itemStorage != null && ownStorage != null) {
             try (Transaction transaction = Transaction.openOuter()) {
                 SoundEvent soundEvent;

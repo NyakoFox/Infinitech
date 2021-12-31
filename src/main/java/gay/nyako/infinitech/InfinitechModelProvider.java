@@ -14,7 +14,8 @@ public class InfinitechModelProvider implements ModelResourceProvider {
     public static final Identifier FLUID_TANK_MODEL_ITEM = new Identifier(InfinitechMod.MOD_ID, "item/fluid_tank");
 
     @Override
-    public @Nullable UnbakedModel loadModelResource(Identifier resourceId, ModelProviderContext context) throws ModelProviderException {
+    public @Nullable
+    UnbakedModel loadModelResource(Identifier resourceId, ModelProviderContext context) throws ModelProviderException {
         if (resourceId.equals(FLUID_TANK_MODEL_BLOCK)) {
             return FLUID_TANK_MODEL;
         } else {

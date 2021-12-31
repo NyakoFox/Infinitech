@@ -56,7 +56,7 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
         sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.values()[directionCompound.getInt("BOTTOM")]);
     }
 
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putLong("Energy", this.energy);
 
@@ -69,8 +69,6 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
         directionCompound.putInt("BOTTOM", sides.get(MachineUtil.Sides.BOTTOM).ordinal());
 
         nbt.put("SideConfiguration", directionCompound);
-
-        return nbt;
     }
 
     @Override

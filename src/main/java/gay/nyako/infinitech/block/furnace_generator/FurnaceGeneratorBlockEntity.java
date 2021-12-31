@@ -111,11 +111,10 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         this.fuelTime = this.getFuelTime((ItemStack)this.inventory.get(0));
     }
 
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putShort("BurnTime", (short)this.burnTime);
         Inventories.writeNbt(nbt, this.inventory);
-        return nbt;
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, FurnaceGeneratorBlockEntity blockEntity) {

@@ -25,15 +25,15 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
     }
 
     public float getFillPercent() {
-        var slot = getFluidSlot(0);
+        FluidSlot slot = getFluidSlot(0);
         return (float)slot.amount / slot.capacity;
     }
 
     public void updateLuminance() {
-        var variant = getStoredVariant();
+        FluidVariant variant = getStoredVariant();
         var luminance = variant.isBlank() ? 0 : variant.getFluid().getDefaultState().getBlockState().getLuminance();
 
-        var state = world.getBlockState(pos);
+        BlockState state = world.getBlockState(pos);
         if (state.get(FluidTankBlock.LUMINANCE).intValue() != luminance) {
             world.setBlockState(pos, state.with(FluidTankBlock.LUMINANCE, luminance));
         }
@@ -77,9 +77,9 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt) {
         FluidInventory.writeNbt(nbt, fluidSlots);
-        return super.writeNbt(nbt);
+        super.writeNbt(nbt);
     }
 
     @Override

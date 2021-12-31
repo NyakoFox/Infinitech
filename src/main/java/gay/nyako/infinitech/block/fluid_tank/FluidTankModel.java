@@ -2,8 +2,10 @@ package gay.nyako.infinitech.block.fluid_tank;
 
 import com.mojang.datafixers.util.Pair;
 import gay.nyako.infinitech.InfinitechMod;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
@@ -95,14 +97,14 @@ public class FluidTankModel implements UnbakedModel, BakedModel, FabricBakedMode
     @Nullable
     @Override
     public BakedModel bake(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
-        var defaultBlockModel = (JsonUnbakedModel) loader.getOrLoadModel(DEFAULT_BLOCK_MODEL);
+        JsonUnbakedModel defaultBlockModel = (JsonUnbakedModel) loader.getOrLoadModel(DEFAULT_BLOCK_MODEL);
         transformation = defaultBlockModel.getTransformations();
 
         sprite = textureGetter.apply(SPRITE_ID);
 
-        var renderer = RendererAccess.INSTANCE.getRenderer();
-        var builder = renderer.meshBuilder();
-        var emitter = builder.getEmitter();
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        MeshBuilder builder = renderer.meshBuilder();
+        QuadEmitter emitter = builder.getEmitter();
 
         for (Direction direction : Direction.values()) {
             emitFace(emitter, direction, 0);

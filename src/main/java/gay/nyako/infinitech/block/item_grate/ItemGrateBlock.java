@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public class ItemGrateBlock extends BlockWithEntity {
 
     public ItemGrateBlock(Settings settings) {
-        super(settings);
+        super(settings.nonOpaque());
     }
 
     @Override

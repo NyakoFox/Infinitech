@@ -31,6 +31,7 @@ public class InfinitechModClient implements ClientModInitializer {
         ScreenRegistry.<PowerBankGuiDescription, PowerBankScreen>register(InfinitechMod.POWER_BANK_SCREEN_HANDLER, (gui, inventory, title) -> new PowerBankScreen(gui, inventory.player, title));
 
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.FLUID_TANK_BLOCK, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.ITEM_GRATE_BLOCK, RenderLayer.getCutout());
 
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(manager -> new InfinitechModelProvider());
 
@@ -45,6 +46,8 @@ public class InfinitechModClient implements ClientModInitializer {
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/energy_off_end"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/item"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/item_end"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/fluid"));
+            registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/fluid_end"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
             registry.register(new Identifier(InfinitechMod.MOD_ID, "block/fluid_tank"));
         });
