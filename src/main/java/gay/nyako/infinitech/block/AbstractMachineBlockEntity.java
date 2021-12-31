@@ -1,7 +1,7 @@
 package gay.nyako.infinitech.block;
 
+import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.storage.energy.MachineEnergyStorage;
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -11,13 +11,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
-public abstract class AbstractMachineBlockEntity extends BlockEntity implements BlockEntityClientSerializable {
+public abstract class AbstractMachineBlockEntity extends BlockEntity {
     public long energy = 0;
     public long capacity;
     public long transferRate = 1_000_000_000;
@@ -71,29 +76,35 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity implements 
         nbt.put("SideConfiguration", directionCompound);
     }
 
+    @Nullable
     @Override
-    public void fromClientTag(NbtCompound tag) {
-        NbtCompound directionCompound = tag.getCompound("SideConfiguration");
-        sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.values()[directionCompound.getInt("FRONT" )]);
-        sides.put(MachineUtil.Sides.BACK,   MachineUtil.SideTypes.values()[directionCompound.getInt("BACK"  )]);
-        sides.put(MachineUtil.Sides.LEFT,   MachineUtil.SideTypes.values()[directionCompound.getInt("LEFT"  )]);
-        sides.put(MachineUtil.Sides.RIGHT,  MachineUtil.SideTypes.values()[directionCompound.getInt("RIGHT" )]);
-        sides.put(MachineUtil.Sides.TOP,    MachineUtil.SideTypes.values()[directionCompound.getInt("TOP"   )]);
-        sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.values()[directionCompound.getInt("BOTTOM")]);
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
     }
 
     @Override
-    public NbtCompound toClientTag(NbtCompound tag) {
-        NbtCompound directionCompound = new NbtCompound();
-        directionCompound.putInt("FRONT",  sides.get(MachineUtil.Sides.FRONT ).ordinal());
-        directionCompound.putInt("BACK",   sides.get(MachineUtil.Sides.BACK  ).ordinal());
-        directionCompound.putInt("LEFT",   sides.get(MachineUtil.Sides.LEFT  ).ordinal());
-        directionCompound.putInt("RIGHT",  sides.get(MachineUtil.Sides.RIGHT ).ordinal());
-        directionCompound.putInt("TOP",    sides.get(MachineUtil.Sides.TOP   ).ordinal());
-        directionCompound.putInt("BOTTOM", sides.get(MachineUtil.Sides.BOTTOM).ordinal());
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound nbt = new NbtCompound();
+        writeNbt(nbt);
+        return nbt;
+    }
 
-        tag.put("SideConfiguration", directionCompound);
-        return tag;
+    @Override
+    public void markDirty() {
+        super.markDirty();
+        try {
+            sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sync() {
+        if (world.isClient()) {
+            System.out.println("don't run sync() on the client!!!!!!! what are u doing!!!!!");
+            return;
+        }
+        ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
     }
 
     /*

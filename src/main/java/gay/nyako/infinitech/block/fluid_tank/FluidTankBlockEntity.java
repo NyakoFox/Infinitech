@@ -4,18 +4,21 @@ import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.storage.fluid.FluidInventory;
 import gay.nyako.infinitech.storage.fluid.FluidSlot;
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FluidTankBlockEntity extends BlockEntity implements FluidInventory, BlockEntityClientSerializable {
+public class FluidTankBlockEntity extends BlockEntity implements FluidInventory {
     private final List<FluidSlot> fluidSlots;
 
     public FluidTankBlockEntity(BlockPos pos, BlockState state) {
@@ -66,8 +69,21 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
     @Override
     public void markDirty() {
         super.markDirty();
-        sync();
         updateLuminance();
+        ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound nbt = new NbtCompound();
+        writeNbt(nbt);
+        return nbt;
     }
 
     @Override
@@ -80,15 +96,5 @@ public class FluidTankBlockEntity extends BlockEntity implements FluidInventory,
     public void writeNbt(NbtCompound nbt) {
         FluidInventory.writeNbt(nbt, fluidSlots);
         super.writeNbt(nbt);
-    }
-
-    @Override
-    public void fromClientTag(NbtCompound tag) {
-        FluidInventory.readNbt(tag, fluidSlots);
-    }
-
-    @Override
-    public NbtCompound toClientTag(NbtCompound tag) {
-        return FluidInventory.writeNbt(tag, fluidSlots);
     }
 }

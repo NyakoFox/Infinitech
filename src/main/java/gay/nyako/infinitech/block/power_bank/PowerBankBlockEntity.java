@@ -3,11 +3,9 @@ package gay.nyako.infinitech.block.power_bank;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
@@ -17,7 +15,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Level;
 
-public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, BlockEntityClientSerializable {
+public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory {
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
@@ -56,8 +54,8 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
 
     @Override
     public void markDirty() {
-        super.markDirty();
         world.setBlockState(pos, getCachedState().with(PowerBankBlock.PERCENTAGE, (int) (((float) energy / ((float) capacity)) * 10)));
+        super.markDirty();
     }
 
     @Override
@@ -74,16 +72,5 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inventory, PlayerEntity player) {
         return new PowerBankGuiDescription(syncId, inventory, ScreenHandlerContext.create(world, pos));
-    }
-
-    @Override
-    public void fromClientTag(NbtCompound tag) {
-        this.energy = tag.getLong("Energy");
-    }
-
-    @Override
-    public NbtCompound toClientTag(NbtCompound tag) {
-        tag.putLong("Energy", this.energy);
-        return tag;
     }
 }

@@ -49,7 +49,9 @@ dependencies {
 
 	modImplementation include("io.github.cottonmc:LibGui:${project.libgui_version}")
 	modApi include("alexiil.mc.lib:libmultipart-all:${project.libmultipart_version}")
-	modApi include("teamreborn:energy:${project.energy_version}")
+	modApi include("teamreborn:energy:${project.energy_version}") {
+		exclude(group: "net.fabricmc.fabric-api", module: "fabric-networking-blockentity-v0")
+	}
 }
 
 processResources {

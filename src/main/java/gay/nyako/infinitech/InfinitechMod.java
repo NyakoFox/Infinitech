@@ -4,7 +4,6 @@ import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.MachineUtil;
-import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlockEntity;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
@@ -70,15 +69,7 @@ public class InfinitechMod implements ModInitializer {
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
-	public static final Block BLOCK_BREAKER_BLOCK = new ItemGrateBlock(FabricBlockSettings
-			.of(Material.METAL)
-			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
-	);
-
 	public static BlockEntityType<ItemGrateBlockEntity> ITEM_GRATE_BLOCK_ENTITY;
-
-	public static BlockEntityType<BlockBreakerBlockEntity> BLOCK_BREAKER_BLOCK_ENTITY;
 
 	public static final ScreenHandlerType<FurnaceGeneratorGuiDescription> FURNACE_GENERATOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"furnace_generator_gui_description"), (syncId, inventory, buf) -> new FurnaceGeneratorGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos()));
 
@@ -161,10 +152,6 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK_ITEM);
 		FLUID_TANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "fluid_tank_entity"), FabricBlockEntityTypeBuilder.create(FluidTankBlockEntity::new, FLUID_TANK_BLOCK).build(null));
-
-		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "block_breaker"), BLOCK_BREAKER_BLOCK);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "block_breaker"), new BlockItem(BLOCK_BREAKER_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
-		BLOCK_BREAKER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "block_breaker_entity"), FabricBlockEntityTypeBuilder.create(BlockBreakerBlockEntity::new, BLOCK_BREAKER_BLOCK).build(null));
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
