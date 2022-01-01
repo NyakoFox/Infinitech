@@ -7,21 +7,15 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
-public abstract class AbstractMachineBlockEntity extends BlockEntity {
+public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
     public long energy = 0;
     public long capacity;
     public long transferRate = 1_000_000_000;
@@ -73,37 +67,6 @@ public abstract class AbstractMachineBlockEntity extends BlockEntity {
         directionCompound.putInt("BOTTOM", sides.get(MachineUtil.Sides.BOTTOM).ordinal());
 
         nbt.put("SideConfiguration", directionCompound);
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        NbtCompound nbt = new NbtCompound();
-        writeNbt(nbt);
-        return nbt;
-    }
-
-    @Override
-    public void markDirty() {
-        super.markDirty();
-        try {
-            sync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void sync() {
-        if (world.isClient()) {
-            System.out.println("don't run sync() on the client!!!!!!! what are u doing!!!!!");
-            return;
-        }
-        ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
     }
 
     /*

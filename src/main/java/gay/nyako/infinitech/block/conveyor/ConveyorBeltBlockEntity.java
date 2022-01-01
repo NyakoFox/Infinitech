@@ -2,29 +2,24 @@ package gay.nyako.infinitech.block.conveyor;
 
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
+import gay.nyako.infinitech.block.SyncingBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-public class ConveyorBeltBlockEntity extends BlockEntity implements ImplementedInventory {
+public class ConveyorBeltBlockEntity extends SyncingBlockEntity implements ImplementedInventory {
     private final DefaultedList<ItemStack> items = DefaultedList.ofSize(1, ItemStack.EMPTY);
     private final InventoryStorage storage = InventoryStorage.of(this, null);
     public float progress = 0f;
@@ -116,14 +111,6 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements ImplementedI
     }
 
     @Override
-    public void markDirty() {
-        super.markDirty();
-        if (!world.isClient()) {
-            sync();
-        }
-    }
-
-    @Override
     public void readNbt(NbtCompound tag) {
         super.readNbt(tag);
         progress = tag.getFloat("progress");
@@ -136,26 +123,5 @@ public class ConveyorBeltBlockEntity extends BlockEntity implements ImplementedI
         Inventories.writeNbt(tag,items);
         tag.putFloat("progress",progress);
         super.writeNbt(tag);
-    }
-
-    public void sync() {
-        if (world.isClient()) {
-            System.out.println("don't run sync() on the client!!!!!!! what are u doing!!!!!");
-            return;
-        }
-        ((ServerWorld) world).getChunkManager().markForUpdate(getPos());
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        NbtCompound nbt = new NbtCompound();
-        writeNbt(nbt);
-        return nbt;
     }
 }
