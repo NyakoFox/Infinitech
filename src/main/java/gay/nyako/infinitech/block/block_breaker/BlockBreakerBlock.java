@@ -1,8 +1,7 @@
 package gay.nyako.infinitech.block.block_breaker;
 
 import gay.nyako.infinitech.InfinitechMod;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;

@@ -22,6 +22,7 @@ import gay.nyako.infinitech.block.pipe.*;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
+import gay.nyako.infinitech.block.xp_drain.XPDrainBlock;
 import gay.nyako.infinitech.storage.fluid.FluidInventory;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItemStorage;
@@ -77,6 +78,11 @@ public class InfinitechMod implements ModInitializer {
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
+	public static final Block XP_DRAIN_BLOCK = new XPDrainBlock(FabricBlockSettings
+			.of(Material.METAL)
+			.strength(4.0f)
+			.breakByTool(FabricToolTags.PICKAXES, 1)
+	);
 
 	public static BlockEntityType<ItemGrateBlockEntity> ITEM_GRATE_BLOCK_ENTITY;
 
@@ -167,6 +173,9 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "block_breaker"), BLOCK_BREAKER_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "block_breaker"), new BlockItem(BLOCK_BREAKER_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		BLOCK_BREAKER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "block_breaker_entity"), FabricBlockEntityTypeBuilder.create(BlockBreakerBlockEntity::new, BLOCK_BREAKER_BLOCK).build(null));
+
+		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "xp_drain"), XP_DRAIN_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "xp_drain"), new BlockItem(XP_DRAIN_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_pipe"), ITEM_PIPE_ITEM);
 		ITEM_PIPE_PART.register();
