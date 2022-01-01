@@ -12,6 +12,8 @@ import gay.nyako.infinitech.block.power_bank.PowerBankScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
@@ -19,6 +21,7 @@ import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 
 public class InfinitechModClient implements ClientModInitializer {
@@ -32,6 +35,7 @@ public class InfinitechModClient implements ClientModInitializer {
 
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.FLUID_TANK_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.ITEM_GRATE_BLOCK, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.XP_DRAIN_BLOCK,   RenderLayer.getCutout());
 
         ModelLoadingRegistry.INSTANCE.registerResourceProvider(manager -> new InfinitechModelProvider());
 
@@ -54,5 +58,21 @@ public class InfinitechModClient implements ClientModInitializer {
 
         FabricModelPredicateProviderRegistry.register(new Identifier(InfinitechMod.MOD_ID, "percentage"), (stack, world, entity, i) ->
                 stack.getOrCreateSubNbt("BlockEntityTag").getFloat("percentage"));
+
+        FluidRenderHandlerRegistry.INSTANCE.register(InfinitechMod.STILL_LIQUID_XP, InfinitechMod.FLOWING_LIQUID_XP, new SimpleFluidRenderHandler(
+                new Identifier("infinitech:block/liquid_xp_still"),
+                new Identifier("infinitech:block/liquid_xp_flowing"),
+                0xFFFFFF
+        ));
+
+        BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), InfinitechMod.STILL_LIQUID_XP, InfinitechMod.FLOWING_LIQUID_XP);
+
+        //if you want to use custom textures they needs to be registered.
+        //In this example this is unnecessary because the vanilla water textures are already registered.
+        //To register your custom textures use this method.
+        ClientSpriteRegistryCallback.event(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).register((atlasTexture, registry) -> {
+            registry.register(new Identifier("infinitech:block/liquid_xp_still"));
+            registry.register(new Identifier("infinitech:block/liquid_xp_flowing"));
+        });
     }
 }

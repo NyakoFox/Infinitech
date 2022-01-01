@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "gay.nyako.infinitech.mixin",
   "compatibilityLevel": "JAVA_16",
-  "mixins": [
+  "mixins": ["ExperienceBottleEntityMixin"
   ],
   "client": [],
   "injectors": {

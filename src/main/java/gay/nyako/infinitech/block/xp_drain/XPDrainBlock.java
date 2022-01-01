@@ -1,5 +1,6 @@
 package gay.nyako.infinitech.block.xp_drain;
 
+import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -40,26 +41,18 @@ public class XPDrainBlock extends Block {
             if (below == null) return;
             if (!below.supportsInsertion()) return;
 
-            int totalGain = 0;
-            if (player.totalExperience > 10) {
-                player.addExperience(-10);
-                totalGain += 2700;
-            } else if (player.totalExperience > 0) {
-                int left = player.totalExperience;
-                player.addExperience(-player.totalExperience);
-                totalGain += ((float) left / 10f) * 2700f;
-            }
-            if (totalGain > 0) {
-                long cantInsert;
-                try (Transaction transaction = Transaction.openOuter()) {
-                    cantInsert = below.insert(FluidVariant.of(Fluids.WATER), totalGain, transaction);
-                    transaction.commit();
-                }
-                player.addExperience((int) ((cantInsert / 2700) * 10f));
+            try (Transaction transaction = Transaction.openOuter()) {
+                long insertionAmount = Math.min(player.totalExperience, 10) * 2700L;
+                long inserted = below.simulateInsert(FluidVariant.of(InfinitechMod.STILL_LIQUID_XP), insertionAmount, transaction);
+                if (inserted < 2700) return; // It can't hold 1 XP, so don't do anything!!
 
-                player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.35f + 0.9f);
-                world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.35f + 0.9f, true);
+                below.insert(FluidVariant.of(InfinitechMod.STILL_LIQUID_XP), insertionAmount, transaction);
+                player.addExperience((int) -(Math.ceil(inserted / 2700L)));
+
+                transaction.commit();
             }
+            player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.35f + 0.9f);
+            world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.35f + 0.9f, true);
         }
 
         super.onSteppedOn(world, pos, state, entity);

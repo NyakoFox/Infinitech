@@ -38,11 +38,12 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.fluid.FlowableFluid;
+import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.sound.BlockSoundGroup;
@@ -120,7 +121,7 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
 
-	public static final FluidTankBlock FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 8, FabricBlockSettings
+	public static final FluidTankBlock FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 16, FabricBlockSettings
 			.of(Material.GLASS)
 			.nonOpaque()
 			.luminance(FluidTankBlock::getLuminance)
@@ -140,6 +141,11 @@ public class InfinitechMod implements ModInitializer {
 	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
+
+	public static FlowableFluid STILL_LIQUID_XP;
+	public static FlowableFluid FLOWING_LIQUID_XP;
+	public static Item LIQUID_XP_BUCKET;
+	public static Block LIQUID_XP;
 
 	@Override
 	public void onInitialize() { // modid is "infinitech"
@@ -241,6 +247,14 @@ public class InfinitechMod implements ModInitializer {
 				}
 			});
 		});
+
+		STILL_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "liquid_xp"), new LiquidXPFluid.Still());
+		FLOWING_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "flowing_liquid_xp"), new LiquidXPFluid.Flowing());
+		LIQUID_XP_BUCKET = Registry.register(Registry.ITEM, new Identifier(MOD_ID, "liquid_xp_bucket"),
+				new BucketItem(STILL_LIQUID_XP, new Item.Settings().recipeRemainder(Items.BUCKET).maxCount(1)));
+
+		LIQUID_XP = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "liquid_xp"), new FluidBlock(STILL_LIQUID_XP, FabricBlockSettings.copy(Blocks.WATER)){});
+
 	}
 
 	public static void log(Level level, String message) {

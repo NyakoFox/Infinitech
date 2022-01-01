@@ -4,7 +4,11 @@
     "block.infinitech.cardboard_box": "Cardboard Box",
     "block.infinitech.fluid_tank": "Fluid Tank",
     "block.infinitech.power_bank": "Power Bank",
+    "block.infinitech.xp_drain": "XP Drain",
+    "block.infinitech.block_breaker": "Block Breaker",
     "container.infinitech.cardboard_box": "Cardboard Box",
     "item.infinitech.item_pipe": "Item Pipe",
-    "item.infinitech.energy_pipe": "Energy Pipe"
+    "item.infinitech.fluid_pipe": "Fluid Pipe",
+    "item.infinitech.energy_pipe": "Energy Pipe",
+    "item.infinitech.liquid_xp_bucket": "Liquid XP Bucket"
 }
