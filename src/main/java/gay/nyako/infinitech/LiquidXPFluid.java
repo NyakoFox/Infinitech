@@ -4,8 +4,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
+
+import java.util.Optional;
 
 public abstract class LiquidXPFluid extends WaterLikeFluid {
     @Override
@@ -27,6 +31,12 @@ public abstract class LiquidXPFluid extends WaterLikeFluid {
     protected BlockState toBlockState(FluidState fluidState) {
         return InfinitechMod.LIQUID_XP.getDefaultState().with(Properties.LEVEL_15, getBlockStateLevel(fluidState));
     }
+
+    @Override
+    public Optional<SoundEvent> getBucketFillSound() {
+        return Optional.of(SoundEvents.ITEM_BUCKET_FILL);
+    }
+
 
     public static class Flowing extends LiquidXPFluid {
         @Override
