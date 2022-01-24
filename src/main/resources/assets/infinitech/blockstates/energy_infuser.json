@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "infinitech:block/energy_infuser" }
+  }
+}

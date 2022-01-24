@@ -89,5 +89,8 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
 
     public static void tick(World world, BlockPos pos, BlockState state, PowerBankBlockEntity blockEntity) {
         blockEntity.oldEnergy = blockEntity.energy;
+
+        // Now let's try to push energy in anything beside us.
+        blockEntity.attemptEnergyTransfers();
     }
 }

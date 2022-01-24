@@ -4,6 +4,8 @@ import alexiil.mc.lib.multipart.api.render.PartStaticModelRegisterEvent;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerScreen;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntityRenderer;
+import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserGuiDescription;
+import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserScreen;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankRenderer;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorScreen;
@@ -35,6 +37,7 @@ public class InfinitechModClient implements ClientModInitializer {
         ScreenRegistry.<FurnaceGeneratorGuiDescription, FurnaceGeneratorScreen>register(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, (gui, inventory, title) -> new FurnaceGeneratorScreen(gui, inventory.player, title));
         ScreenRegistry.<PowerBankGuiDescription, PowerBankScreen>register(InfinitechMod.POWER_BANK_SCREEN_HANDLER, (gui, inventory, title) -> new PowerBankScreen(gui, inventory.player, title));
         ScreenRegistry.<BlockBreakerGuiDescription, BlockBreakerScreen>register(InfinitechMod.BLOCK_BREAKER_SCREEN_HANDLER, (gui, inventory, title) -> new BlockBreakerScreen(gui, inventory.player, title));
+        ScreenRegistry.<EnergyInfuserGuiDescription, EnergyInfuserScreen>register(InfinitechMod.ENERGY_INFUSER_SCREEN_HANDLER, (gui, inventory, title) -> new EnergyInfuserScreen(gui, inventory.player, title));
 
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.FLUID_TANK_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.ITEM_GRATE_BLOCK, RenderLayer.getCutout());

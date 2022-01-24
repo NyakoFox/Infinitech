@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block.furnace_generator;
 
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.InfinitechMod;
+import gay.nyako.infinitech.block.AbstractGeneratorBlockEntity;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -34,8 +35,7 @@ import team.reborn.energy.api.EnergyStorageUtil;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory {
-    private final InventoryStorage storage = InventoryStorage.of(this, null);
+public class FurnaceGeneratorBlockEntity extends AbstractGeneratorBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory {
     int burnTime;
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
@@ -45,6 +45,9 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
     // 4000 / 1600 = 2.5, so we use 2.5.
     // That's sad.
     private final double energyRate = 2.5;
+    // Multiply the speed by 4, so we're actually giving 10 E/t.
+    // The API can't do doubles or floats, and well, 2 or 3 E/t is *way* too slow.
+    private final int speed = 4;
 
     public FurnaceGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state, 200_000, 1_000);
@@ -136,24 +139,19 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         boolean bl = blockEntity.isBurning();
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
-            blockEntity.energy += blockEntity.energyRate;
+            blockEntity.energy += blockEntity.energyRate * blockEntity.speed;
             if (blockEntity.energy > blockEntity.capacity) {
                 blockEntity.energy = blockEntity.capacity;
             }
 
-            --blockEntity.burnTime;
+            blockEntity.burnTime -= blockEntity.speed;
         }
 
         // First, let's try to charge an item.
         blockEntity.processChargeSlot();
 
         // Now let's try to push energy in anything beside us.
-        for (Direction dir : Direction.values()) {
-            EnergyStorage storage = EnergyStorage.SIDED.find(world,pos.offset(dir),dir.getOpposite());
-            if (storage != null) {
-                EnergyStorageUtil.move(blockEntity.energyStorage, storage, blockEntity.transferRate, null);
-            }
-        }
+        blockEntity.attemptEnergyTransfers();
 
         // Now we should attempt to pull in or push out items, depending on the side configuration.
         blockEntity.attemptSideTransfers(blockEntity.storage);

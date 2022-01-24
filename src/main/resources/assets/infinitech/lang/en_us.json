@@ -1,15 +1,16 @@
 {
-    "block.infinitech.furnace_generator": "Furnace Generator",
-    "block.infinitech.conveyor_belt": "Conveyor Belt",
+    "block.infinitech.block_breaker": "Block Breaker",
     "block.infinitech.cardboard_box": "Cardboard Box",
+    "block.infinitech.conveyor_belt": "Conveyor Belt",
+    "block.infinitech.energy_infuser": "Energy Infuser",
     "block.infinitech.fluid_tank": "Fluid Tank",
+    "block.infinitech.furnace_generator": "Furnace Generator",
     "block.infinitech.power_bank": "Power Bank",
     "block.infinitech.xp_drain": "XP Drain",
-    "block.infinitech.block_breaker": "Block Breaker",
     "container.infinitech.cardboard_box": "Cardboard Box",
-    "item.infinitech.item_pipe": "Item Pipe",
-    "item.infinitech.fluid_pipe": "Fluid Pipe",
     "item.infinitech.energy_pipe": "Energy Pipe",
+    "item.infinitech.fluid_pipe": "Fluid Pipe",
+    "item.infinitech.item_pipe": "Item Pipe",
     "item.infinitech.liquid_xp_bucket": "Liquid XP Bucket",
     "item.infinitech.staff_of_ender": "Staff of Ender"
 }

@@ -3,6 +3,7 @@ package gay.nyako.infinitech;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
+import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserBlock;
 import gay.nyako.infinitech.block.MachineUtil;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlock;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlockEntity;
@@ -11,6 +12,8 @@ import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
+import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserBlockEntity;
+import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserGuiDescription;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankBlock;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockEntity;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankBlockItem;
@@ -82,6 +85,12 @@ public class InfinitechMod implements ModInitializer {
 			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
+	public static final Block ENERGY_INFUSER_BLOCK = new EnergyInfuserBlock(FabricBlockSettings
+			.of(Material.METAL)
+			.strength(4.0f)
+			.breakByTool(FabricToolTags.PICKAXES, 1)
+	);
+
 	public static final Block XP_DRAIN_BLOCK = new XPDrainBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
@@ -92,11 +101,15 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<BlockBreakerBlockEntity> BLOCK_BREAKER_BLOCK_ENTITY;
 
+	public static BlockEntityType<EnergyInfuserBlockEntity> ENERGY_INFUSER_BLOCK_ENTITY;
+
 	public static final ScreenHandlerType<FurnaceGeneratorGuiDescription> FURNACE_GENERATOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"furnace_generator_gui_description"), (syncId, inventory, buf) -> new FurnaceGeneratorGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
 	public static final ScreenHandlerType<PowerBankGuiDescription> POWER_BANK_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(MOD_ID,"power_bank_gui_description"), (syncId, inventory) -> new PowerBankGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY));
 
 	public static final ScreenHandlerType<BlockBreakerGuiDescription> BLOCK_BREAKER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"block_breaker_gui_description"), (syncId, inventory, buf) -> new BlockBreakerGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
+
+	public static final ScreenHandlerType<EnergyInfuserGuiDescription> ENERGY_INFUSER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"energy_infuser_gui_description"), (syncId, inventory, buf) -> new EnergyInfuserGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
 	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
 
@@ -190,6 +203,11 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "block_breaker"), BLOCK_BREAKER_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "block_breaker"), new BlockItem(BLOCK_BREAKER_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		BLOCK_BREAKER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "block_breaker_entity"), FabricBlockEntityTypeBuilder.create(BlockBreakerBlockEntity::new, BLOCK_BREAKER_BLOCK).build(null));
+
+		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "energy_infuser"), ENERGY_INFUSER_BLOCK);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "energy_infuser"), new BlockItem(ENERGY_INFUSER_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
+		ENERGY_INFUSER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "energy_infuser_entity"), FabricBlockEntityTypeBuilder.create(EnergyInfuserBlockEntity::new, ENERGY_INFUSER_BLOCK).build(null));
+
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "xp_drain"), XP_DRAIN_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "xp_drain"), new BlockItem(XP_DRAIN_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));

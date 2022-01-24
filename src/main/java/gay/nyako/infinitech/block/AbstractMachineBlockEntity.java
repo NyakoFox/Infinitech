@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block;
 
 import gay.nyako.infinitech.ImplementedInventory;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
+import gay.nyako.infinitech.item.StaffOfEnderItem;
 import gay.nyako.infinitech.storage.energy.MachineEnergyStorage;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
@@ -39,8 +40,9 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
     public long capacity;
     public long transferRate;
     public boolean canInsert = true;
-    public boolean canExtract = false;
+    public boolean canExtract = true;
     public MachineEnergyStorage energyStorage;
+    public InventoryStorage storage;
     public HashMap<MachineUtil.Sides, MachineUtil.SideTypes> sides = new HashMap<>();
     public DefaultedList<ItemStack> inventory;
     private int[] slots;
@@ -65,6 +67,7 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
         }
         this.slots = new int[Math.max(slots - 1, 0)];
         this.inventory = DefaultedList.ofSize(slots, ItemStack.EMPTY);
+        this.storage = InventoryStorage.of(this, null);
     }
 
     protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long capacity) {
@@ -163,6 +166,19 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
     }
 
     /**
+     * Attempt energy transfers based on all sides.
+     */
+    protected void attemptEnergyTransfers() {
+        for (Direction dir : Direction.values()) {
+            if (world.getBlockEntity(pos.offset(dir)) instanceof AbstractGeneratorBlockEntity) continue;
+            EnergyStorage storage = EnergyStorage.SIDED.find(world,pos.offset(dir),dir.getOpposite());
+            if (storage != null) {
+                EnergyStorageUtil.move(energyStorage, storage, transferRate, null);
+            }
+        }
+    }
+
+    /**
      * Attempt to charge a battery.
      */
     public void processChargeSlot() {
@@ -170,12 +186,13 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
         if (!hasBatterySlot()) return;
         ItemStack itemStack = inventory.get(getBatteryIndex());
         if (!itemStack.isEmpty() && EnergyStorageUtil.isEnergyStorage(itemStack)) {
-            // Grab the context for the item
-            ContainerItemContext ctx = ContainerItemContext.withInitial(itemStack);
+            NbtCompound stackNbt = itemStack.getOrCreateNbt();
+            stackNbt.putInt("oldEnergy", stackNbt.getInt("energy"));
+            itemStack.setNbt(stackNbt);
             // Grab the energy storage
-            EnergyStorage itemEnergyStorage = EnergyStorage.ITEM.find(itemStack, ctx);
+            EnergyStorage itemEnergyStorage = ContainerItemContext.ofSingleSlot(InventoryStorage.of(this, null).getSlot(getBatteryIndex())).find(EnergyStorage.ITEM);
             // Move between our block and the item
-            EnergyStorageUtil.move(energyStorage, itemEnergyStorage, transferRate, null);
+            EnergyStorageUtil.move(energyStorage, itemEnergyStorage, Long.MAX_VALUE, null);
         }
     }
 

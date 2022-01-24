@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "infinitech:block/machine_top",
+    "front": "infinitech:block/energy_infuser",
+    "side": "infinitech:block/energy_infuser"
+  }
+}
