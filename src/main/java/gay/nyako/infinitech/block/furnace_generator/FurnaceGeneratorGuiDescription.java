@@ -20,12 +20,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
-    private static final int INVENTORY_SIZE = 1;
-    private static final int PROPERTY_COUNT = 3;
+    private static final int PROPERTY_COUNT = 4;
     private WItemSlot itemSlot;
 
-    public FurnaceGeneratorGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, BlockPos blockPos) {
-        super(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, syncId, playerInventory, getBlockInventory(context, INVENTORY_SIZE),getBlockPropertyDelegate(context, PROPERTY_COUNT));
+    public FurnaceGeneratorGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, AbstractMachineBlockEntity blockEntity) {
+        super(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, syncId, playerInventory, getBlockInventory(context, blockEntity.size()),getBlockPropertyDelegate(context, PROPERTY_COUNT));
 
         WPlainPanel root = new WPlainPanel();
 
@@ -43,26 +42,9 @@ public class FurnaceGeneratorGuiDescription extends SyncedGuiDescription {
         itemSlot = WItemSlot.of(blockInventory, 0);
         root.add(itemSlot, 72, 27);
 
-        WEnergyBar energyBar = new WEnergyBar(2,200000, true);
-        energyBar.setTooltipCallback(information -> {
-            information.add(Text.of("Generating: 20 E/t"));
-            information.add(Text.of("Transfer rate: 1000 E/t"));
-        });
-        root.add(energyBar, 72 + 29, 27 - 15, 8, 48);
+        MachineUtil.DrawEnergyBar(5, -1, root, blockInventory, blockEntity, 2, 3);
 
-        BlockEntity blockEntity = playerInventory.player.world.getBlockEntity(blockPos);
-
-        if (blockEntity instanceof AbstractMachineBlockEntity machineBlockEntity) {
-            int xoff = 120;
-            int yoff = 20;
-
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.LEFT  ), MachineUtil.Sides.LEFT,   blockPos, false, true), xoff + 0,  yoff + 10, 10, 10);
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.FRONT ), MachineUtil.Sides.FRONT,  blockPos, false, true), xoff + 10, yoff + 10, 10, 10);
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.RIGHT ), MachineUtil.Sides.RIGHT,  blockPos, false, true), xoff + 20, yoff + 10, 10, 10);
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.TOP   ), MachineUtil.Sides.TOP,    blockPos, false, true), xoff + 10, yoff + 0,  10, 10);
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.BOTTOM), MachineUtil.Sides.BOTTOM, blockPos, false, true), xoff + 10, yoff + 20, 10, 10);
-            root.add(new WSideButton(machineBlockEntity.sides.get(MachineUtil.Sides.BACK  ), MachineUtil.Sides.BACK,   blockPos, false, true), xoff + 20, yoff + 20, 10, 10);
-        }
+        MachineUtil.DrawSideButtons(120, 20, root, blockEntity, false, true);
 
         root.add(this.createPlayerInventoryPanel(), 0, 65);
 

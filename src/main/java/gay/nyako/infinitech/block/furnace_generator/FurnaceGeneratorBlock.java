@@ -33,14 +33,6 @@ public class FurnaceGeneratorBlock extends FurnaceBlock {
         return checkType(type, InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, FurnaceGeneratorBlockEntity::tick);
     }
 
-    /*@Override
-    protected void openScreen(World world, BlockPos pos, PlayerEntity player) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof FurnaceGeneratorBlockEntity) {
-            player.openHandledScreen((NamedScreenHandlerFactory)blockEntity);
-        }
-    }*/
-
     public static ToIntFunction<BlockState> getLuminance() {
         return blockState -> blockState.get(AbstractFurnaceBlock.LIT) ? 15 : 0;
     }

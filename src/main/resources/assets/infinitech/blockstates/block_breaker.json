@@ -1,5 +1,27 @@
 {
   "variants": {
-    "": { "model": "infinitech:block/block_breaker" }
+    "facing=down": {
+      "model": "infinitech:block/block_breaker",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "infinitech:block/block_breaker",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "infinitech:block/block_breaker"
+    },
+    "facing=south": {
+      "model": "infinitech:block/block_breaker",
+      "y": 180
+    },
+    "facing=up": {
+      "model": "infinitech:block/block_breaker",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "infinitech:block/block_breaker",
+      "y": 270
+    }
   }
 }

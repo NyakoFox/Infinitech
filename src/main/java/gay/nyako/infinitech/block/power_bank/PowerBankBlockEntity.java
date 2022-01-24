@@ -2,8 +2,10 @@ package gay.nyako.infinitech.block.power_bank;
 
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
+import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlockEntity;
 import io.github.cottonmc.cotton.gui.PropertyDelegateHolder;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.NamedScreenHandlerFactory;
@@ -13,7 +15,7 @@ import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
-import org.apache.logging.log4j.Level;
+import net.minecraft.world.World;
 
 public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory {
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
@@ -22,6 +24,7 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
             return switch (index) {
                 case 0 -> (int) energy;
                 case 1 -> (int) capacity;
+                case 2 -> (int) oldEnergy;
                 default -> 0;
             };
         }
@@ -36,20 +39,30 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
 
         @Override
         public int size() {
-            return 2;
+            return 3;
         }
     };
-
-    public PowerBankBlockEntity(BlockPos pos, BlockState state) {
-        super(InfinitechMod.POWER_BANK_BLOCK_ENTITY, pos, state, 2_000_000, 10_000);
-        canInsert = true;
-        canExtract = true;
-    }
 
     public PowerBankBlockEntity(BlockPos pos, BlockState state, long capacity, long transferRate) {
         super(InfinitechMod.POWER_BANK_BLOCK_ENTITY, pos, state, capacity, transferRate);
         canInsert = true;
         canExtract = true;
+    }
+
+    @Override
+    public int getSlotAmount() {
+        // No slots.
+        return 0;
+    }
+
+    @Override
+    public boolean hasBatterySlot() {
+        // It should have a battery slot.
+        return true;
+    }
+
+    public PowerBankBlockEntity(BlockPos pos, BlockState state) {
+        this(pos, state, 2_000_000, 10_000);
     }
 
     @Override
@@ -72,5 +85,9 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inventory, PlayerEntity player) {
         return new PowerBankGuiDescription(syncId, inventory, ScreenHandlerContext.create(world, pos));
+    }
+
+    public static void tick(World world, BlockPos pos, BlockState state, PowerBankBlockEntity blockEntity) {
+        blockEntity.oldEnergy = blockEntity.energy;
     }
 }

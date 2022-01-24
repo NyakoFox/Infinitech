@@ -1,7 +1,11 @@
 package gay.nyako.infinitech.block.power_bank;
 
+import gay.nyako.infinitech.InfinitechMod;
+import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
@@ -10,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class PowerBankBlock extends BlockWithEntity {
 
@@ -18,6 +23,12 @@ public class PowerBankBlock extends BlockWithEntity {
     public PowerBankBlock(Settings settings) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(PERCENTAGE, 0));
+    }
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return checkType(type, InfinitechMod.POWER_BANK_BLOCK_ENTITY, PowerBankBlockEntity::tick);
     }
 
     @Override

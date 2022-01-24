@@ -1,6 +1,8 @@
 package gay.nyako.infinitech;
 
 import alexiil.mc.lib.multipart.api.render.PartStaticModelRegisterEvent;
+import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
+import gay.nyako.infinitech.block.block_breaker.BlockBreakerScreen;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntityRenderer;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankRenderer;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
@@ -32,6 +34,7 @@ public class InfinitechModClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(InfinitechMod.FLUID_TANK_BLOCK_ITEM, new FluidTankRenderer());
         ScreenRegistry.<FurnaceGeneratorGuiDescription, FurnaceGeneratorScreen>register(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, (gui, inventory, title) -> new FurnaceGeneratorScreen(gui, inventory.player, title));
         ScreenRegistry.<PowerBankGuiDescription, PowerBankScreen>register(InfinitechMod.POWER_BANK_SCREEN_HANDLER, (gui, inventory, title) -> new PowerBankScreen(gui, inventory.player, title));
+        ScreenRegistry.<BlockBreakerGuiDescription, BlockBreakerScreen>register(InfinitechMod.BLOCK_BREAKER_SCREEN_HANDLER, (gui, inventory, title) -> new BlockBreakerScreen(gui, inventory.player, title));
 
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.FLUID_TANK_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.ITEM_GRATE_BLOCK, RenderLayer.getCutout());

@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 
 public class PowerBankGuiDescription extends SyncedGuiDescription {
     private static final int INVENTORY_SIZE = 0;
-    private static final int PROPERTY_COUNT = 2;
+    private static final int PROPERTY_COUNT = 3;
 
     public PowerBankGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(InfinitechMod.POWER_BANK_SCREEN_HANDLER, syncId, playerInventory, getBlockInventory(context, INVENTORY_SIZE), getBlockPropertyDelegate(context, PROPERTY_COUNT));
@@ -21,7 +21,7 @@ public class PowerBankGuiDescription extends SyncedGuiDescription {
         root.setSize(176, 166);
         root.setInsets(Insets.ROOT_PANEL);
 
-        WEnergyBar energyBar = new WEnergyBar(0,1);
+        WEnergyBar energyBar = new WEnergyBar(0,2,1);
         energyBar.setTooltipCallback(information -> {
             information.add(Text.of("Transfer rate: 10000 E/t"));
         });

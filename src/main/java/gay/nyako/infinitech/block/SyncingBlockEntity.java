@@ -31,10 +31,8 @@ public abstract class SyncingBlockEntity extends BlockEntity {
     @Override
     public void markDirty() {
         super.markDirty();
-        try {
+        if (!world.isClient()) {
             sync();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

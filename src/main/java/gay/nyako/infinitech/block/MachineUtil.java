@@ -1,10 +1,14 @@
 package gay.nyako.infinitech.block;
 
+import gay.nyako.infinitech.WEnergyBar;
+import gay.nyako.infinitech.WSideButton;
 import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
-import io.github.cottonmc.cotton.gui.widget.WItemSlot;
-import io.github.cottonmc.cotton.gui.widget.WWidget;
+import io.github.cottonmc.cotton.gui.widget.*;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
@@ -77,5 +81,27 @@ public class MachineUtil {
 
     public static void ColorSlot(WItemSlot itemSlot, SideTypes sideType) {
         itemSlot.setBackgroundPainter(new ColoredSlotBackgroundPainter(sideType));
+    }
+
+    public static void DrawEnergyBar(int x, int y, WPlainPanel root, Inventory blockInventory, AbstractMachineBlockEntity blockEntity, int field, int oldField) {
+        WEnergyBar energyBar = new WEnergyBar(field, oldField, (int) blockEntity.capacity, true);
+        energyBar.setTooltipCallback(information -> {
+            information.add(Text.of("Transfer rate: " + blockEntity.transferRate + " E/t"));
+        });
+        root.add(energyBar, x, y, 8, 42);
+
+        if (blockEntity.hasBatterySlot()) {
+            WItemSlot itemSlot = WItemSlot.of(blockInventory, blockEntity.getBatteryIndex());
+            root.add(itemSlot, x - 5, y + 45);
+        }
+    }
+
+    public static void DrawSideButtons(int xoff, int yoff, WPlainPanel root, AbstractMachineBlockEntity blockEntity, boolean inputDisabled, boolean ouputDisabled) {
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.LEFT  ), MachineUtil.Sides.LEFT,   blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 0,  yoff + 10, 10, 10);
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.FRONT ), MachineUtil.Sides.FRONT,  blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 10, yoff + 10, 10, 10);
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.RIGHT ), MachineUtil.Sides.RIGHT,  blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 20, yoff + 10, 10, 10);
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.TOP   ), MachineUtil.Sides.TOP,    blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 10, yoff + 0,  10, 10);
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.BOTTOM), MachineUtil.Sides.BOTTOM, blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 10, yoff + 20, 10, 10);
+        root.add(new WSideButton(blockEntity.sides.get(MachineUtil.Sides.BACK  ), MachineUtil.Sides.BACK,   blockEntity.getPos(), inputDisabled, ouputDisabled), xoff + 20, yoff + 20, 10, 10);
     }
 }

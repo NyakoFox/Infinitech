@@ -1,28 +1,50 @@
 package gay.nyako.infinitech.block;
 
+import gay.nyako.infinitech.ImplementedInventory;
+import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorBlockEntity;
 import gay.nyako.infinitech.storage.energy.MachineEnergyStorage;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SidedInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+import team.reborn.energy.api.EnergyStorageUtil;
+import team.reborn.energy.api.base.SimpleBatteryItem;
 
 import java.util.HashMap;
 
-public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
+public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity implements ImplementedInventory, SidedInventory, InventoryProvider {
     public long energy = 0;
+    public long oldEnergy = -1;
     public long capacity;
-    public long transferRate = 1_000_000_000;
+    public long transferRate;
     public boolean canInsert = true;
     public boolean canExtract = false;
     public MachineEnergyStorage energyStorage;
     public HashMap<MachineUtil.Sides, MachineUtil.SideTypes> sides = new HashMap<>();
+    public DefaultedList<ItemStack> inventory;
+    private int[] slots;
+    public int slotOffset = 0;
 
     protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long capacity, long transferRate) {
         super(type, pos, state);
@@ -35,11 +57,34 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
         sides.put(MachineUtil.Sides.RIGHT,  MachineUtil.SideTypes.UNSET);
         sides.put(MachineUtil.Sides.TOP,    MachineUtil.SideTypes.UNSET);
         sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.UNSET);
+
+        int slots = getSlotAmount();
+        if (hasBatterySlot()) {
+            slotOffset++;
+            slots++;
+        }
+        this.slots = new int[Math.max(slots - 1, 0)];
+        this.inventory = DefaultedList.ofSize(slots, ItemStack.EMPTY);
     }
 
     protected AbstractMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, long capacity) {
         this(type, pos, state, capacity, 1_000_000_000);
     }
+
+    /**
+     * The amount of slots the machine should have, minus any
+     * slots that all machines have (for example, the battery slot).
+     *
+     * @return      the base amount of slots the inventory should have
+     */
+    public abstract int getSlotAmount();
+
+    /**
+     * Should the machine have a charging slot?
+     *
+     * @return      the battery slot
+     */
+    public abstract boolean hasBatterySlot();
 
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
@@ -52,6 +97,9 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
         sides.put(MachineUtil.Sides.RIGHT,  MachineUtil.SideTypes.values()[directionCompound.getInt("RIGHT" )]);
         sides.put(MachineUtil.Sides.TOP,    MachineUtil.SideTypes.values()[directionCompound.getInt("TOP"   )]);
         sides.put(MachineUtil.Sides.BOTTOM, MachineUtil.SideTypes.values()[directionCompound.getInt("BOTTOM")]);
+
+        clear();
+        Inventories.readNbt(nbt,inventory);
     }
 
     public void writeNbt(NbtCompound nbt) {
@@ -67,6 +115,8 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
         directionCompound.putInt("BOTTOM", sides.get(MachineUtil.Sides.BOTTOM).ordinal());
 
         nbt.put("SideConfiguration", directionCompound);
+
+        Inventories.writeNbt(nbt,inventory);
     }
 
     /*
@@ -77,7 +127,11 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
         return (sides.get(side) != MachineUtil.SideTypes.OFF);
     }
 
-    // Is a side disabled?
+    /**
+     * Is this side disabled?
+     *
+     * @return      if a side is disabled
+     */
     public boolean isSideDisabled(Direction direction) {
         Direction baseDir = getCachedState().get(Properties.HORIZONTAL_FACING);
         MachineUtil.Sides side = MachineUtil.DirectionToSide(baseDir, direction);
@@ -85,7 +139,9 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
         return (sideType == MachineUtil.SideTypes.OFF);
     }
 
-    // Attempt transfers based on side
+    /**
+     * Attempt transfers based on all sides.
+     */
     public void attemptSideTransfers(InventoryStorage storage) {
         if (world.isClient()) return;
         Direction baseDir = getCachedState().get(Properties.HORIZONTAL_FACING);
@@ -104,5 +160,59 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity {
                 StorageUtil.move(storage, back, item -> true, 1, null);
             }
         }
+    }
+
+    /**
+     * Attempt to charge a battery.
+     */
+    public void processChargeSlot() {
+        if (world.isClient()) return;
+        if (!hasBatterySlot()) return;
+        ItemStack itemStack = inventory.get(getBatteryIndex());
+        if (!itemStack.isEmpty() && EnergyStorageUtil.isEnergyStorage(itemStack)) {
+            // Grab the context for the item
+            ContainerItemContext ctx = ContainerItemContext.withInitial(itemStack);
+            // Grab the energy storage
+            EnergyStorage itemEnergyStorage = EnergyStorage.ITEM.find(itemStack, ctx);
+            // Move between our block and the item
+            EnergyStorageUtil.move(energyStorage, itemEnergyStorage, transferRate, null);
+        }
+    }
+
+    public int getBatteryIndex() {
+        if (hasBatterySlot()) return size() - 1;
+        return -1;
+    }
+
+    @Override
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        if (slot == getBatteryIndex()) return EnergyStorageUtil.isEnergyStorage(stack);
+        return true;
+    }
+
+    @Override
+    public boolean isValid(int slot, ItemStack stack) {
+        if (slot == getBatteryIndex()) return EnergyStorageUtil.isEnergyStorage(stack);
+        return true;
+    }
+
+    @Override
+    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+        return false;
+    }
+
+    @Override
+    public DefaultedList<ItemStack> getItems() {
+        return inventory;
+    }
+
+    @Override
+    public SidedInventory getInventory(BlockState state, WorldAccess world, BlockPos pos) {
+        return this;
+    }
+
+    @Override
+    public int[] getAvailableSlots(Direction side) {
+        return slots;
     }
 }

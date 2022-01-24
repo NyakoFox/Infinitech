@@ -34,15 +34,17 @@ import team.reborn.energy.api.EnergyStorageUtil;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory, InventoryProvider, SidedInventory, ImplementedInventory {
-    private static final int[] SLOTS = new int[]{0};
-    protected DefaultedList<ItemStack> inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
+public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity implements PropertyDelegateHolder, NamedScreenHandlerFactory, ExtendedScreenHandlerFactory {
     private final InventoryStorage storage = InventoryStorage.of(this, null);
     int burnTime;
     int fuelTime;
     protected final PropertyDelegate propertyDelegate;
 
-    private final double energyRate = 20; // 20 energy per tick maybe??
+    // 1 coal burns for 1600,
+    // And 1 coal is supposed to equal 4000 energy according to the api.
+    // 4000 / 1600 = 2.5, so we use 2.5.
+    // That's sad.
+    private final double energyRate = 2.5;
 
     public FurnaceGeneratorBlockEntity(BlockPos pos, BlockState state) {
         super(InfinitechMod.FURNACE_GENERATOR_BLOCK_ENTITY, pos, state, 200_000, 1_000);
@@ -54,11 +56,13 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
             public int get(int index) {
                 switch(index) {
                     case 0:
-                        return FurnaceGeneratorBlockEntity.this.burnTime;
+                        return burnTime;
                     case 1:
-                        return FurnaceGeneratorBlockEntity.this.fuelTime;
+                        return fuelTime;
                     case 2:
-                        return (int) FurnaceGeneratorBlockEntity.this.energy;
+                        return (int) energy;
+                    case 3:
+                        return (int) oldEnergy;
                     default:
                         return 0;
                 }
@@ -75,15 +79,28 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
                         break;
                     case 2:
                         FurnaceGeneratorBlockEntity.this.energy = value;
+                        break;
                 }
 
             }
 
             @Override
             public int size() {
-                return 3;
+                return 4;
             }
         };
+    }
+
+    @Override
+    public int getSlotAmount() {
+        // It should have one slot for the output.
+        return 1;
+    }
+
+    @Override
+    public boolean hasBatterySlot() {
+        // It should have a battery slot.
+        return true;
     }
 
     protected Text getContainerName() {
@@ -105,19 +122,17 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
 
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
-        this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory);
         this.burnTime = nbt.getShort("BurnTime");
-        this.fuelTime = this.getFuelTime((ItemStack)this.inventory.get(0));
+        this.fuelTime = this.getFuelTime((ItemStack) inventory.get(0));
     }
 
     public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putShort("BurnTime", (short)this.burnTime);
-        Inventories.writeNbt(nbt, this.inventory);
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, FurnaceGeneratorBlockEntity blockEntity) {
+        blockEntity.oldEnergy = blockEntity.energy;
         boolean bl = blockEntity.isBurning();
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
@@ -129,15 +144,18 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
             --blockEntity.burnTime;
         }
 
+        // First, let's try to charge an item.
+        blockEntity.processChargeSlot();
+
+        // Now let's try to push energy in anything beside us.
         for (Direction dir : Direction.values()) {
-
             EnergyStorage storage = EnergyStorage.SIDED.find(world,pos.offset(dir),dir.getOpposite());
-
             if (storage != null) {
                 EnergyStorageUtil.move(blockEntity.energyStorage, storage, blockEntity.transferRate, null);
             }
         }
 
+        // Now we should attempt to pull in or push out items, depending on the side configuration.
         blockEntity.attemptSideTransfers(blockEntity.storage);
 
         ItemStack itemStack = blockEntity.inventory.get(0); // Fuel
@@ -184,79 +202,16 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         return createFuelTimeMap().containsKey(stack.getItem());
     }
 
-    public int[] getAvailableSlots(Direction side) {
-        return SLOTS;
-    }
-
+    @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (isSideDisabled(dir)) return false;
-        return this.isValid(slot, stack);
-    }
-
-    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return false;
-    }
-
-    @Override
-    public DefaultedList<ItemStack> getItems() {
-        return inventory;
-    }
-
-    public int size() {
-        return this.inventory.size();
-    }
-
-    public boolean isEmpty() {
-        Iterator var1 = this.inventory.iterator();
-
-        ItemStack itemStack;
-        do {
-            if (!var1.hasNext()) {
-                return true;
-            }
-
-            itemStack = (ItemStack)var1.next();
-        } while(itemStack.isEmpty());
-
-        return false;
-    }
-
-    public ItemStack getStack(int slot) {
-        return this.inventory.get(slot);
-    }
-
-    public ItemStack removeStack(int slot, int amount) {
-        return Inventories.splitStack(this.inventory, slot, amount);
-    }
-
-    public ItemStack removeStack(int slot) {
-        return Inventories.removeStack(this.inventory, slot);
-    }
-
-    public void setStack(int slot, ItemStack stack) {
-        ItemStack itemStack = this.inventory.get(slot);
-        this.inventory.set(slot, stack);
-        if (stack.getCount() > this.getMaxCountPerStack()) {
-            stack.setCount(this.getMaxCountPerStack());
-        }
-        this.markDirty();
-
-    }
-
-    public boolean canPlayerUse(PlayerEntity player) {
-        if (this.world.getBlockEntity(this.pos) != this) {
-            return false;
-        } else {
-            return player.squaredDistanceTo((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
-        }
+        if (slot == 0) return isValid(slot, stack);
+        return super.canInsert(slot, stack, dir);
     }
 
     public boolean isValid(int slot, ItemStack stack) {
-        return canUseAsFuel(stack);
-    }
-
-    public void clear() {
-        this.inventory.clear();
+        if (slot == 0) return canUseAsFuel(stack);
+        return super.isValid(slot, stack);
     }
 
     @Override
@@ -264,12 +219,7 @@ public class FurnaceGeneratorBlockEntity extends AbstractMachineBlockEntity impl
         //We provide *this* to the screenHandler as our class Implements Inventory
         //Only the Server has the Inventory at the start, this will be synced to the client in the ScreenHandler
         //return new FurnaceGeneratorScreenHandler(syncId, playerInventory, this, propertyDelegate);
-        return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos), pos);
-    }
-
-    @Override
-    public SidedInventory getInventory(BlockState state, WorldAccess world, BlockPos pos) {
-        return this;
+        return new FurnaceGeneratorGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(world, pos), this);
     }
 
     @Override

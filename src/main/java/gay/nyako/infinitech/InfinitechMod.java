@@ -6,6 +6,7 @@ import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.MachineUtil;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlock;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlockEntity;
+import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
 import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
@@ -23,6 +24,7 @@ import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
 import gay.nyako.infinitech.block.xp_drain.XPDrainBlock;
+import gay.nyako.infinitech.item.StaffOfEnderItem;
 import gay.nyako.infinitech.storage.fluid.FluidInventory;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItemStorage;
@@ -42,6 +44,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.FlowableFluid;
 import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -89,9 +92,11 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<BlockBreakerBlockEntity> BLOCK_BREAKER_BLOCK_ENTITY;
 
-	public static final ScreenHandlerType<FurnaceGeneratorGuiDescription> FURNACE_GENERATOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"furnace_generator_gui_description"), (syncId, inventory, buf) -> new FurnaceGeneratorGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos()));
+	public static final ScreenHandlerType<FurnaceGeneratorGuiDescription> FURNACE_GENERATOR_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"furnace_generator_gui_description"), (syncId, inventory, buf) -> new FurnaceGeneratorGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
 	public static final ScreenHandlerType<PowerBankGuiDescription> POWER_BANK_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(MOD_ID,"power_bank_gui_description"), (syncId, inventory) -> new PowerBankGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY));
+
+	public static final ScreenHandlerType<BlockBreakerGuiDescription> BLOCK_BREAKER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"block_breaker_gui_description"), (syncId, inventory, buf) -> new BlockBreakerGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
 	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
 
@@ -146,6 +151,12 @@ public class InfinitechMod implements ModInitializer {
 	public static FlowableFluid FLOWING_LIQUID_XP;
 	public static Item LIQUID_XP_BUCKET;
 	public static Block LIQUID_XP;
+
+	public static final Item STAFF_OF_ENDER = new StaffOfEnderItem(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
+
+	public static AbstractMachineBlockEntity getPacketBlockEntity(PlayerInventory playerInventory, BlockPos blockPos) {
+		return (AbstractMachineBlockEntity) playerInventory.player.world.getBlockEntity(blockPos);
+	}
 
 	@Override
 	public void onInitialize() { // modid is "infinitech"
@@ -255,6 +266,7 @@ public class InfinitechMod implements ModInitializer {
 
 		LIQUID_XP = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "liquid_xp"), new FluidBlock(STILL_LIQUID_XP, FabricBlockSettings.copy(Blocks.WATER).luminance(state -> 15)){});
 
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "staff_of_ender"), STAFF_OF_ENDER);
 	}
 
 	public static void log(Level level, String message) {
