@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 
 public class PowerBankGuiDescription extends SyncedGuiDescription {
     private static final int INVENTORY_SIZE = 0;
-    private static final int PROPERTY_COUNT = 3;
+    private static final int PROPERTY_COUNT = 4;
 
     public PowerBankGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(InfinitechMod.POWER_BANK_SCREEN_HANDLER, syncId, playerInventory, getBlockInventory(context, INVENTORY_SIZE), getBlockPropertyDelegate(context, PROPERTY_COUNT));

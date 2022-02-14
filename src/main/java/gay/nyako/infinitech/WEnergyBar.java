@@ -12,34 +12,34 @@ public class WEnergyBar extends WBar {
     private static final Identifier ENERGY_BAR_FG = new Identifier(InfinitechMod.MOD_ID, "textures/gui/container/energy_full.png");
 
     public final int field;
-    public final int oldField;
+    public final int differenceField;
 
     public Consumer<TooltipBuilder> tooltipCallback;
 
-    public WEnergyBar(int field, int oldField, int max, boolean constantMaximum) {
+    public WEnergyBar(int field, int differenceField, int max, boolean constantMaximum) {
         super(ENERGY_BAR_BG, ENERGY_BAR_FG, field, (constantMaximum ? -1 : max), Direction.UP);
         this.field = field;
-        this.oldField = oldField;
+        this.differenceField = differenceField;
         if (constantMaximum) {
             this.maxValue = max;
         }
     }
 
-    public WEnergyBar(int field, int oldField, int max) {
+    public WEnergyBar(int field, int differenceField, int max) {
         super(ENERGY_BAR_BG, ENERGY_BAR_FG, field, max, Direction.UP);
         this.field = field;
-        this.oldField = oldField;
+        this.differenceField = differenceField;
     }
 
 
     @Override
     public void addTooltip(TooltipBuilder information) {
-        int difference = properties.get(field) - properties.get(oldField);
+        int difference = properties.get(differenceField);
         String differenceText = "(";
         if (difference < 0) {
-            differenceText += "§c+";
+            differenceText += "§c";
         } else if (difference > 0) {
-            differenceText += "§a";
+            differenceText += "§a+";
         }
         differenceText += difference + " E/t§r)";
 
@@ -51,9 +51,6 @@ public class WEnergyBar extends WBar {
         if (tooltipCallback != null) {
             tooltipCallback.accept(information);
         }
-        /*information.add(Text.of("Energy stored: " + properties.get(field) + "/200000 E"));
-        information.add(Text.of("Generating: 20 E/t"));
-        information.add(Text.of("Transfer rate: 1000 E/t"));*/
     }
 
     public void setTooltipCallback(Consumer<TooltipBuilder> tooltipCallback) {

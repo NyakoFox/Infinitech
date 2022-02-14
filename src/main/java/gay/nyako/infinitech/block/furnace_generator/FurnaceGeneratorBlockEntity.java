@@ -58,31 +58,21 @@ public class FurnaceGeneratorBlockEntity extends AbstractGeneratorBlockEntity im
             @Override
             public int get(int index) {
                 switch(index) {
-                    case 0:
-                        return burnTime;
-                    case 1:
-                        return fuelTime;
-                    case 2:
-                        return (int) energy;
-                    case 3:
-                        return (int) oldEnergy;
-                    default:
-                        return 0;
+                    case 0: return burnTime;
+                    case 1: return fuelTime;
+                    case 2: return (int) energy;
+                    case 3: return (int) difference;
+                    default: return 0;
                 }
             }
 
             @Override
             public void set(int index, int value) {
                 switch(index) {
-                    case 0:
-                        FurnaceGeneratorBlockEntity.this.burnTime = value;
-                        break;
-                    case 1:
-                        FurnaceGeneratorBlockEntity.this.fuelTime = value;
-                        break;
-                    case 2:
-                        FurnaceGeneratorBlockEntity.this.energy = value;
-                        break;
+                    case 0: burnTime = value; break;
+                    case 1: fuelTime = value; break;
+                    case 2: energy = value; break;
+                    case 3: difference = value; break;
                 }
 
             }
@@ -135,7 +125,6 @@ public class FurnaceGeneratorBlockEntity extends AbstractGeneratorBlockEntity im
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, FurnaceGeneratorBlockEntity blockEntity) {
-        blockEntity.oldEnergy = blockEntity.energy;
         boolean bl = blockEntity.isBurning();
         boolean bl2 = false;
         if (blockEntity.isBurning()) {
@@ -184,7 +173,7 @@ public class FurnaceGeneratorBlockEntity extends AbstractGeneratorBlockEntity im
         if (bl2) {
             markDirty(world, pos, state);
         }
-
+        blockEntity.calculateEnergyDifference();
     }
 
     protected int getFuelTime(ItemStack fuel) {

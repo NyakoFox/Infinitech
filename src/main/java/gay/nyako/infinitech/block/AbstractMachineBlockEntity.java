@@ -37,6 +37,7 @@ import java.util.HashMap;
 public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity implements ImplementedInventory, SidedInventory, InventoryProvider {
     public long energy = 0;
     public long oldEnergy = -1;
+    public long difference = -1;
     public long capacity;
     public long transferRate;
     public boolean canInsert = true;
@@ -92,6 +93,7 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
         this.energy = nbt.getLong("Energy");
+        this.difference = nbt.getLong("Difference");
 
         NbtCompound directionCompound = nbt.getCompound("SideConfiguration");
         sides.put(MachineUtil.Sides.FRONT,  MachineUtil.SideTypes.values()[directionCompound.getInt("FRONT" )]);
@@ -108,6 +110,7 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
     public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
         nbt.putLong("Energy", this.energy);
+        nbt.putLong("Difference", this.difference);
 
         NbtCompound directionCompound = new NbtCompound();
         directionCompound.putInt("FRONT",  sides.get(MachineUtil.Sides.FRONT ).ordinal());
@@ -194,6 +197,11 @@ public abstract class AbstractMachineBlockEntity extends SyncingBlockEntity impl
             // Move between our block and the item
             EnergyStorageUtil.move(energyStorage, itemEnergyStorage, Long.MAX_VALUE, null);
         }
+    }
+
+    public void calculateEnergyDifference() {
+        difference = energy - oldEnergy;
+        oldEnergy = energy;
     }
 
     public int getBatteryIndex() {

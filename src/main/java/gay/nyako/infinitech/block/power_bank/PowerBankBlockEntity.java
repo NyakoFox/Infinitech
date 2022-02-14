@@ -24,7 +24,7 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
             return switch (index) {
                 case 0 -> (int) energy;
                 case 1 -> (int) capacity;
-                case 2 -> (int) oldEnergy;
+                case 2 -> (int) difference;
                 default -> 0;
             };
         }
@@ -32,8 +32,9 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case 0: energy = value;
-                case 1: capacity = value;
+                case 0: energy = value; break;
+                case 1: capacity = value; break;
+                case 2: difference = value; break;
             }
         }
 
@@ -88,9 +89,11 @@ public class PowerBankBlockEntity extends AbstractMachineBlockEntity implements 
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, PowerBankBlockEntity blockEntity) {
-        blockEntity.oldEnergy = blockEntity.energy;
+        if (!world.isClient()) {
+            // Let's try to push energy in anything beside us.
+            blockEntity.attemptEnergyTransfers();
 
-        // Now let's try to push energy in anything beside us.
-        blockEntity.attemptEnergyTransfers();
+            blockEntity.calculateEnergyDifference();
+        }
     }
 }

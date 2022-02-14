@@ -34,24 +34,19 @@ public class BlockBreakerBlockEntity extends AbstractMachineBlockEntity implemen
         @Override
         public int get(int index) {
             switch (index) {
-                case 0:
-                    return breakProgress;
-                case 1:
-                    return (int) energy;
-                case 2:
-                    return (int) oldEnergy;
-                default:
-                    return 0;
+                case 0: return breakProgress;
+                case 1: return (int) energy;
+                case 2: return (int) difference;
+                default: return 0;
             }
         }
 
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case 0:
-                    breakProgress = value;
-                case 1:
-                    energy = value;
+                case 0: breakProgress = value; break;
+                case 1: energy = value; break;
+                case 2: difference = value; break;
             }
         }
 
@@ -174,7 +169,6 @@ public class BlockBreakerBlockEntity extends AbstractMachineBlockEntity implemen
         if (world.isClient()) {
             world.setBlockBreakingInfo(blockEntity.getFakePlayer().getId(), blockEntity.getBreakPos(), blockEntity.getBreakPercentage() / 10);
         } else {
-            blockEntity.oldEnergy = blockEntity.energy;
             int oldBreakPercentage = blockEntity.getBreakPercentage();
             if (blockEntity.getBreakState().isAir() || blockEntity.getBreakState().getHardness(world, pos) < 0) {
                 // We should probably cancel breaking...
@@ -191,6 +185,7 @@ public class BlockBreakerBlockEntity extends AbstractMachineBlockEntity implemen
             if (oldBreakPercentage != blockEntity.getBreakPercentage()) {
                 blockEntity.sync();
             }
+            blockEntity.calculateEnergyDifference();
         }
     }
 

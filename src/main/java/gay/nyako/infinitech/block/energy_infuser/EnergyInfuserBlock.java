@@ -60,7 +60,7 @@ public class EnergyInfuserBlock extends BlockWithEntity {
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext context) {
-        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerLookDirection());
+            return this.getDefaultState().with(Properties.HORIZONTAL_FACING, context.getPlayerFacing().getOpposite());
     }
 
     @Override

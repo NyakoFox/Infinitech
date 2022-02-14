@@ -34,20 +34,17 @@ public class EnergyInfuserBlockEntity extends AbstractMachineBlockEntity impleme
         @Override
         public int get(int index) {
             switch (index) {
-                case 0:
-                    return (int) energy;
-                case 1:
-                    return (int) oldEnergy;
-                default:
-                    return 0;
+                case 0: return (int) energy;
+                case 1: return (int) difference;
+                default: return 0;
             }
         }
 
         @Override
         public void set(int index, int value) {
             switch (index) {
-                case 1:
-                    energy = value;
+                case 1: energy = value; break;
+                case 2: difference = value; break;
             }
         }
 
@@ -80,14 +77,13 @@ public class EnergyInfuserBlockEntity extends AbstractMachineBlockEntity impleme
 
     public static void tick(World world, BlockPos pos, BlockState state, EnergyInfuserBlockEntity blockEntity) {
         if (!world.isClient()) {
-            blockEntity.oldEnergy = blockEntity.energy;
-
             // First, let's try to charge an item.
             blockEntity.processChargeSlot();
 
             // Now we should attempt to pull in or push out items, depending on the side configuration.
             blockEntity.attemptSideTransfers(blockEntity.storage);
 
+            blockEntity.calculateEnergyDifference();
         }
     }
 

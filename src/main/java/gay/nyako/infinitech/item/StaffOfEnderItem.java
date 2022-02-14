@@ -42,9 +42,9 @@ public class StaffOfEnderItem extends Item implements SimpleBatteryItem {
         ItemStack stack = user.getStackInHand(hand);
         if (getStoredEnergy(stack) >= TELEPORT_COST) {
             HitResult result = user.raycast(10d, 0.0f, false);
-            double x = Math.floor(result.getPos().getX()) + 0.5f;
-            double y = Math.floor(result.getPos().getY());
-            double z = Math.floor(result.getPos().getZ()) + 0.5f;
+            double x = Math.round(result.getPos().getX()) - 0.5f;
+            double y = Math.round(result.getPos().getY());
+            double z = Math.round(result.getPos().getZ()) - 0.5f;
             user.requestTeleportAndDismount(x, y, z);
             world.playSound(x, y, z, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 1.0f, 1.0f, true);
             tryUseEnergy(stack, TELEPORT_COST);
