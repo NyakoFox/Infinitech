@@ -6,15 +6,21 @@ import java.util.*;
 
 public interface PipeShapeContext {
     PipeTypes getPipeType();
+    List<PipeTypes> getAllPipeTypes();
 
-    Map<Direction, List<PipeTypes>> getContainerConnections();
+    List<Direction> getBlockConnectionDirs();
 
-    default List<Direction> getContainerConnections(PipeTypes type) {
-        var connections = getContainerConnections();
-        var result = new ArrayList<Direction>();
-        for (Direction direction : Direction.values()) {
-            if (connections.get(direction).contains(type)) {
-                result.add(direction);
+    Map<PipeTypes, List<Direction>> getPipeConnectionMap();
+
+    default List<Direction> getConnectionsFor(PipeTypes type) {
+        return getPipeConnectionMap().getOrDefault(type, new ArrayList<>());
+    }
+
+    default List<PipeTypes> getPipesFacing(Direction direction) {
+        var result = new ArrayList<PipeTypes>();
+        for (var type : getAllPipeTypes()) {
+            if (getConnectionsFor(type).contains(direction)) {
+                result.add(type);
             }
         }
         return result;

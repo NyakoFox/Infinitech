@@ -1,5 +1,6 @@
 package gay.nyako.infinitech.block.pipe;
 
+import com.google.common.collect.Lists;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.texture.Sprite;
@@ -13,59 +14,37 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public record PipeShape(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean endFaces) {
-    public static PipeShape of(Direction direction, Vec2f offset, boolean small) {
-        /*var min = small ? 2 : 0;
-        var max = small ? 14 : 16;
+public record PipeShape(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) implements PipeShapeBase {
+    public static PipeShape of(Direction direction, Vec2f offset) {
         return switch (direction) {
-            case NORTH -> fromBlockCoords(direction, 6 + offset.x, 6 + offset.y, min, 10 + offset.x, 10 + offset.y, 6);
-            case SOUTH -> fromBlockCoords(direction, 6 + offset.x, 6 + offset.y, 10, 10 + offset.x, 10 + offset.y, max);
-            case EAST -> fromBlockCoords(direction, 10, 6 + offset.y, 6 + offset.x, max, 10 + offset.y, 10 + offset.x);
-            case WEST -> fromBlockCoords(direction, min, 6 + offset.y, 6 + offset.x, 6, 10 + offset.y, 10 + offset.x);
-            case UP -> fromBlockCoords(direction, 6 + offset.x, 10, 6 + offset.y, 10 + offset.x, max, 10 + offset.y);
-            case DOWN -> fromBlockCoords(direction, 6 + offset.x, min, 6 + offset.y, 10 + offset.x, 6, 10 + offset.y);
-        };*/
-        var min = small ? 2 : 0;
-        var max = small ? 14 : 16;
-        return switch (direction) {
-            case NORTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, min, 9.5 + offset.x, 9.5 + offset.y, 6.5, small);
-            case SOUTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 9.5, 9.5 + offset.x, 9.5 + offset.y, max, small);
-            case EAST -> fromBlockCoords(direction, 9.5, 6.5 + offset.y, 6.5 + offset.x, max, 9.5 + offset.y, 9.5 + offset.x, small);
-            case WEST -> fromBlockCoords(direction, min, 6.5 + offset.y, 6.5 + offset.x, 6.5, 9.5 + offset.y, 9.5 + offset.x, small);
-            case UP -> fromBlockCoords(direction, 6.5 + offset.x, 9.5, 6.5 + offset.y, 9.5 + offset.x, max, 9.5 + offset.y, small);
-            case DOWN -> fromBlockCoords(direction, 6.5 + offset.x, min, 6.5 + offset.y, 9.5 + offset.x, 6.5, 9.5 + offset.y, small);
+            case NORTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 0, 9.5 + offset.x, 9.5 + offset.y, 8);
+            case SOUTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 8, 9.5 + offset.x, 9.5 + offset.y, 16);
+            case EAST -> fromBlockCoords(direction, 8, 6.5 + offset.y, 6.5 + offset.x, 16, 9.5 + offset.y, 9.5 + offset.x);
+            case WEST -> fromBlockCoords(direction, 0, 6.5 + offset.y, 6.5 + offset.x, 8, 9.5 + offset.y, 9.5 + offset.x);
+            case UP -> fromBlockCoords(direction, 6.5 + offset.x, 8, 6.5 + offset.y, 9.5 + offset.x, 16, 9.5 + offset.y);
+            case DOWN -> fromBlockCoords(direction, 6.5 + offset.x, 0, 6.5 + offset.y, 9.5 + offset.x, 8, 9.5 + offset.y);
         };
     }
 
     public static PipeShape ofStraight(Direction direction, Vec2f offset) {
-        /*return switch (direction) {
-            case NORTH, SOUTH -> fromBlockCoords(direction, 6 + offset.x, 6 + offset.y, 0, 10 + offset.x, 10 + offset.y, 16);
-            case EAST, WEST -> fromBlockCoords(direction, 0, 6 + offset.y, 6 + offset.x, 16, 10 + offset.y, 10 + offset.x);
-            case UP, DOWN -> fromBlockCoords(direction, 6 + offset.x, 0, 6 + offset.y, 10 + offset.x, 16, 10 + offset.y);
-        };*/
         return switch (direction) {
-            case NORTH, SOUTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 0, 9.5 + offset.x, 9.5 + offset.y, 16, false);
-            case EAST, WEST -> fromBlockCoords(direction, 0, 6.5 + offset.y, 6.5 + offset.x, 16, 9.5 + offset.y, 9.5 + offset.x, false);
-            case UP, DOWN -> fromBlockCoords(direction, 6.5 + offset.x, 0, 6.5 + offset.y, 9.5 + offset.x, 16, 9.5 + offset.y, false);
+            case NORTH, SOUTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 0, 9.5 + offset.x, 9.5 + offset.y, 16);
+            case EAST, WEST -> fromBlockCoords(direction, 0, 6.5 + offset.y, 6.5 + offset.x, 16, 9.5 + offset.y, 9.5 + offset.x);
+            case UP, DOWN -> fromBlockCoords(direction, 6.5 + offset.x, 0, 6.5 + offset.y, 9.5 + offset.x, 16, 9.5 + offset.y);
         };
     }
 
-    public static PipeShape fromBlockCoords(Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, boolean endFaces) {
-        return new PipeShape(direction, minX/16.0D, minY/16.0D, minZ/16.0D, maxX/16.0D, maxY/16.0D, maxZ/16.0D, endFaces);
+    public static PipeShape fromBlockCoords(Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        return new PipeShape(direction, minX/16.0D, minY/16.0D, minZ/16.0D, maxX/16.0D, maxY/16.0D, maxZ/16.0D);
     }
 
     public static Vec2f getPipeOffset(PipeShapeContext ctx, Direction direction) {
         var type = ctx.getPipeType();
-        var frens = ctx.getContainerConnections().get(direction);
+        var frens = ctx.getPipesFacing(direction);
         if (frens.size() == 2) {
             var first = (frens.get(0) == type ? type.compareTo(frens.get(1)) : type.compareTo(frens.get(0))) < 0;
-            return new Vec2f(first ? -2.5f : 2.5f, 0f);
+            return new Vec2f(first ? -2f : 2f, 0f);
         } else if (frens.size() == 3) {
-            /*return switch(type) {
-                case ITEM -> new Vec2f(-2.5f, 2.5f);
-                case FLUID -> new Vec2f(2.5f, 2.5f);
-                case ENERGY -> new Vec2f(0f, -2.5f);
-            };*/
             return switch(type) {
                 case ITEM -> new Vec2f(-2f, 2f);
                 case FLUID -> new Vec2f(2f, 2f);
@@ -75,25 +54,51 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
         return Vec2f.ZERO;
     }
 
-    private static Vec3d get3DPipeOffset(Vec2f offset, Direction direction) {
-        var axis = direction.getAxis();
-
-        var x = axis.choose(0f, offset.x, offset.x);
-        var y = axis.choose(offset.y, 0f, offset.y);
-        var z = axis.choose(offset.x, offset.y, 0f);
-
-        return new Vec3d(x, y, z);
+    public static Vec3d getSinglePipePosition(PipeShapeContext ctx) {
+        var type = ctx.getPipeType();
+        var maxDirs = 0;
+        for (var dir : Direction.values()) {
+            maxDirs = Math.max(maxDirs, ctx.getPipesFacing(dir).size());
+        }
+        if (maxDirs == 0) {
+            var pipes = ctx.getAllPipeTypes();
+            var pipeCount = pipes.size();
+            if (pipeCount == 1) {
+                return new Vec3d(6.5, 6.5, 6.5);
+            } else if (pipeCount == 2) {
+                var first = (pipes.get(0) == type ? type.compareTo(pipes.get(1)) : type.compareTo(pipes.get(0))) < 0;
+                return first ? new Vec3d(4.5, 6.5, 6.5) : new Vec3d(8.5, 6.5, 6.5);
+            } else if (pipeCount == 3) {
+                return switch(type) {
+                    case ITEM -> new Vec3d(4.5, 6.5, 4.5);
+                    case FLUID -> new Vec3d(8.5, 6.5, 4.5);
+                    case ENERGY -> new Vec3d(6.5, 6.5, 8.5);
+                };
+            }
+        } else if (maxDirs == 1) {
+            return switch(type) {
+                case ITEM -> new Vec3d(3, 10, 3);
+                case FLUID -> new Vec3d(10, 10, 3);
+                case ENERGY -> new Vec3d(3, 10, 10);
+            };
+        } else if (maxDirs == 2) {
+            return switch(type) {
+                case ITEM -> new Vec3d(2.5, 10.5, 2.5);
+                case FLUID -> new Vec3d(10.5, 10.5, 2.5);
+                case ENERGY -> new Vec3d(2.5, 10.5, 10.5);
+            };
+        }
+        return new Vec3d(0, 0, 0);
     }
 
     public static boolean isStraight(PipeShapeContext ctx) {
-        var ownConnections = ctx.getContainerConnections(ctx.getPipeType());
+        var ownConnections = ctx.getConnectionsFor(ctx.getPipeType());
         if (ownConnections.size() == 2) {
             var first = ownConnections.get(0);
             var second = ownConnections.get(1);
-            var allConnections = ctx.getContainerConnections();
             for (Direction direction : Direction.values()) {
-                var types = allConnections.get(direction);
-                if ((types.size() > 0 && direction != first && direction != second) || !types.equals(allConnections.get(direction.getOpposite()))) {
+                var types = ctx.getPipesFacing(direction);
+                if ((types.size() > 0 && direction != first && direction != second) || !types.equals(ctx.getPipesFacing(direction.getOpposite()))) {
                     return false;
                 }
             }
@@ -102,44 +107,66 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
         return false;
     }
 
-    public static double getCenterSize(PipeShapeContext ctx) {
-        var connections = ctx.getContainerConnections();
-        for (var list : connections.values()) {
-            if (list.size() > 1) {
-                return 9;
+    public static List<PipeConnectorShape> getConnectorShapes(PipeShapeContext ctx) {
+        var result = new ArrayList<PipeConnectorShape>();
+        for (var dir : ctx.getBlockConnectionDirs()) {
+            result.add(switch(dir) {
+                case NORTH -> PipeConnectorShape.fromBlockCoords(3, 3, 0, 13, 13, 1);
+                case SOUTH -> PipeConnectorShape.fromBlockCoords(3, 3, 15, 13, 13, 16);
+                case EAST -> PipeConnectorShape.fromBlockCoords(15, 3, 3, 16, 13, 13);
+                case WEST -> PipeConnectorShape.fromBlockCoords(0, 3, 3, 1, 13, 13);
+                case UP -> PipeConnectorShape.fromBlockCoords(3, 15, 3, 13, 16, 13);
+                case DOWN -> PipeConnectorShape.fromBlockCoords(3, 0, 3, 13, 1, 13);
+            });
+        }
+        return result;
+    }
+
+    public static PipeConnectorShape getCenterShape(PipeShapeContext ctx) {
+        var size = new Vec3d(4, 4, 4);
+        var foundDirections = new ArrayList<Direction>();
+        for (var dir : Direction.values()) {
+            var pipes = ctx.getPipesFacing(dir);
+            var pipeCount = pipes.size();
+            if (pipeCount > 0) {
+                foundDirections.add(dir);
+                var localSize = switch(pipeCount) {
+                    case 2 -> new Vec2f(8f, 4f);
+                    case 3 -> new Vec2f(8f, 8f);
+                    default -> new Vec2f(4f, 4f);
+                };
+                size = switch (dir) {
+                    case NORTH, SOUTH -> new Vec3d(Math.max(size.x, localSize.x), Math.max(size.y, localSize.y), size.z);
+                    case EAST, WEST -> new Vec3d(size.x, Math.max(size.y, localSize.y), Math.max(size.z, localSize.x));
+                    case UP, DOWN -> new Vec3d(Math.max(size.x, localSize.x), size.y, Math.max(size.z, localSize.y));
+                };
             }
         }
-        return 4;
-    }
-
-    public static PipeShape getCenterShape(PipeShapeContext ctx) {
-        if (isStraight(ctx)) {
+        if (foundDirections.size() <= 1) {
             return null;
+        } else if (foundDirections.size() == 2) {
+            var first = foundDirections.get(0);
+            var second = foundDirections.get(1);
+            if (first.getOpposite() == second && ctx.getPipesFacing(first).equals(ctx.getPipesFacing(second))) {
+                return null;
+            }
         }
-        var centerSize = getCenterSize(ctx);
-        var min = 8 - centerSize/2;
-        var max = 8 + centerSize/2;
-        return fromBlockCoords(null, min, min, min, max, max, max, true);
+        var pos = new Vec3d(8 - (size.x/2), 8 - (size.y/2), 8 - (size.z/2));
+        return PipeConnectorShape.fromBlockCoords(pos.x, pos.y, pos.z, pos.x + size.x, pos.y + size.y, pos.z + size.z);
     }
 
-    public static List<PipeShape> getConnectionShapes(PipeShapeContext ctx) {
-        var connections = ctx.getContainerConnections(ctx.getPipeType());
+    public static List<PipeShapeBase> getPipeShapes(PipeShapeContext ctx) {
+        var connections = ctx.getConnectionsFor(ctx.getPipeType());
         if (!connections.isEmpty()) {
             if (!isStraight(ctx)) {
-                return new ArrayList<>(connections.stream().map(dir -> of(dir, getPipeOffset(ctx, dir), false)).toList());
+                return new ArrayList<>(connections.stream().map(dir -> of(dir, getPipeOffset(ctx, dir))).toList());
             } else {
                 return new ArrayList<>(connections.stream().map((dir) -> Direction.from(dir.getAxis(), Direction.AxisDirection.POSITIVE))
                         .distinct().map(dir -> ofStraight(dir, getPipeOffset(ctx, dir))).toList());
             }
         } else {
-            var allConnections = ctx.getContainerConnections();
-            var list = new ArrayList<PipeShape>();
-            for (Direction direction : Direction.values()) {
-                if (allConnections.get(direction).isEmpty()) {
-                    list.add(of(direction, getPipeOffset(ctx, direction), true));
-                }
-            }
-            return list;
+            var pos = getSinglePipePosition(ctx);
+            return Lists.newArrayList(fromBlockCoords(null, pos.x, pos.y, pos.z, pos.x + 3, pos.y + 3, pos.z + 3));
         }
     }
 
@@ -147,22 +174,28 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
      Instance Methods
      */
 
+    @Override
     public VoxelShape toVoxelShape() {
         return VoxelShapes.cuboid(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public void emit(QuadEmitter emitter, Sprite sprite, Sprite endSprite) {
+    @Override
+    public void emit(QuadEmitter emitter, PipePartModelKey key) {
         for (Direction face : Direction.values()) {
-            emitFace(emitter, sprite, endSprite, face);
+            emitFace(emitter, key.getSprite(), key.getEndSprite(), face);
         }
     }
 
     private void emitFace(QuadEmitter emitter, Sprite sprite, Sprite endSprite, Direction face) {
-        var isEndFace = direction != null && face.getAxis() == direction.getAxis();
-        if (isEndFace && !endFaces) {
-            return;
-        }
+        var isEndFace = direction == null || face == direction.getOpposite();
         var faceSprite = isEndFace ? endSprite : sprite;
+        if (direction != null && isEndFace) {
+            var axis = face.getAxis();
+            var axisDir = face.getDirection();
+            if ((axisDir == Direction.AxisDirection.NEGATIVE && axis.choose(minX, minY, minZ) == 0) || (axisDir == Direction.AxisDirection.POSITIVE && axis.choose(maxX, maxY, maxZ) == 1)) {
+                return;
+            }
+        }
         switch (face) {
             case UP -> emitSingleQuad(emitter, faceSprite, isEndFace, Direction.UP, minX, 1 - maxZ, maxX, 1 - minZ, 1 - maxY);
             case DOWN -> emitSingleQuad(emitter, faceSprite, isEndFace, Direction.DOWN, minX, minZ, maxX, maxZ, minY);

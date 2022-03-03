@@ -11,14 +11,18 @@ public class PipePartModelKey extends PartModelKey implements PipeShapeContext {
     public final Class<?> clazz;
     public final SpriteIdentifier spriteId;
     public final SpriteIdentifier endSpriteId;
-    public final Map<Direction, List<PipeTypes>> connections;
     public final PipeTypes pipeType;
+    public final List<PipeTypes> containerPipes;
+    public final List<Direction> blockConnectionDirs;
+    public final Map<PipeTypes, List<Direction>> connections;
 
     public PipePartModelKey(AbstractPipePart pipePart) {
         this.clazz = pipePart.getClass();
         this.spriteId = pipePart.getSpriteId();
         this.endSpriteId = pipePart.getEndSpriteId();
-        this.connections = pipePart.getContainerConnections();
+        this.containerPipes = pipePart.getAllPipeTypes();
+        this.blockConnectionDirs = pipePart.getBlockConnectionDirs();
+        this.connections = pipePart.getPipeConnectionMap();
         this.pipeType = pipePart.getPipeType();
     }
 
@@ -34,20 +38,30 @@ public class PipePartModelKey extends PartModelKey implements PipeShapeContext {
     }
 
     @Override
-    public Map<Direction, List<PipeTypes>> getContainerConnections() {
+    public List<PipeTypes> getAllPipeTypes() {
+        return containerPipes;
+    }
+
+    @Override
+    public List<Direction> getBlockConnectionDirs() {
+        return blockConnectionDirs;
+    }
+
+    @Override
+    public Map<PipeTypes, List<Direction>> getPipeConnectionMap() {
         return connections;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof PipePartModelKey key) {
-            return key.clazz == clazz && connections.equals(key.connections) && key.spriteId == spriteId && key.pipeType == pipeType;
+            return key.clazz == clazz && connections.equals(key.connections) && blockConnectionDirs.equals(key.blockConnectionDirs) && key.spriteId == spriteId && key.pipeType == pipeType;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clazz, spriteId, connections, pipeType);
+        return Objects.hash(clazz, spriteId, connections, blockConnectionDirs, pipeType);
     }
 }

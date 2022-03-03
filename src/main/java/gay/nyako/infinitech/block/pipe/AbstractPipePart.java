@@ -138,20 +138,30 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
     }
 
     @Override
-    public Map<Direction, List<PipeTypes>> getContainerConnections() {
-        var result = new HashMap<Direction, List<PipeTypes>>();
-        for (Direction direction : Direction.values()) {
-            result.put(direction, new ArrayList<>());
-        }
+    public List<PipeTypes> getAllPipeTypes() {
+        var result = new ArrayList<PipeTypes>();
         var parts = holder.getContainer().getAllParts(part -> part instanceof AbstractPipePart);
         for (AbstractPart part : parts) {
             var pipe = (AbstractPipePart) part;
-            var connections = pipe.getConnectedSides();
-            for (var direction : connections) {
-                result.get(direction).add(pipe.getPipeType());
-            }
+            result.add(pipe.getPipeType());
         }
         return result;
+    }
+
+    @Override
+    public Map<PipeTypes, List<Direction>> getPipeConnectionMap() {
+        var result = new HashMap<PipeTypes, List<Direction>>();
+        var parts = holder.getContainer().getAllParts(part -> part instanceof AbstractPipePart);
+        for (AbstractPart part : parts) {
+            var pipe = (AbstractPipePart) part;
+            result.put(pipe.getPipeType(), new ArrayList<>(pipe.getConnectedSides()));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Direction> getBlockConnectionDirs() {
+        return getConnections().stream().map(ctx -> ctx.direction()).toList();
     }
 
     protected void clearConnections() {
@@ -217,12 +227,13 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
 
     @Override
     public VoxelShape getShape() {
-        var shapes = PipeShape.getConnectionShapes(this);
+        var shapes = PipeShape.getPipeShapes(this);
         var centerShape = PipeShape.getCenterShape(this);
         if (centerShape != null) {
             shapes.add(centerShape);
         }
-        return shapes.stream().map(PipeShape::toVoxelShape).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
+        shapes.addAll(PipeShape.getConnectorShapes(this));
+        return shapes.stream().map(PipeShapeBase::toVoxelShape).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
     }
 
     @Nullable
@@ -264,6 +275,10 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         for (Direction direction : connectedSides) {
             buffer.writeEnumConstant(direction);
         }
+        buffer.writeVarInt(connections.size());
+        for (var dir : connections.keySet()) {
+            buffer.writeEnumConstant(dir);
+        }
     }
 
     public void receiveConnectionData(NetByteBuf buffer, IMsgReadCtx ctx) {
@@ -272,7 +287,13 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         for (int i = 0; i < size; i++) {
             connectedSides.add(buffer.readEnumConstant(Direction.class));
         }
+        connections.clear();
         var container = holder.getContainer();
+        size = buffer.readVarInt();
+        for (int i = 0; i < size; i++) {
+            var dir = buffer.readEnumConstant(Direction.class);
+            connections.put(dir, new PipeConnectionContext(this, container.getMultipartWorld(), container.getMultipartPos().offset(dir), dir));
+        }
         container.recalculateShape();
         container.redrawIfChanged();
     }
