@@ -26,14 +26,6 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
         };
     }
 
-    public static PipeShape ofStraight(Direction direction, Vec2f offset) {
-        return switch (direction) {
-            case NORTH, SOUTH -> fromBlockCoords(direction, 6.5 + offset.x, 6.5 + offset.y, 0, 9.5 + offset.x, 9.5 + offset.y, 16);
-            case EAST, WEST -> fromBlockCoords(direction, 0, 6.5 + offset.y, 6.5 + offset.x, 16, 9.5 + offset.y, 9.5 + offset.x);
-            case UP, DOWN -> fromBlockCoords(direction, 6.5 + offset.x, 0, 6.5 + offset.y, 9.5 + offset.x, 16, 9.5 + offset.y);
-        };
-    }
-
     public static PipeShape fromBlockCoords(Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
         return new PipeShape(direction, minX/16.0D, minY/16.0D, minZ/16.0D, maxX/16.0D, maxY/16.0D, maxZ/16.0D);
     }
@@ -111,12 +103,12 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
         var result = new ArrayList<PipeConnectorShape>();
         for (var dir : ctx.getBlockConnectionDirs()) {
             result.add(switch(dir) {
-                case NORTH -> PipeConnectorShape.fromBlockCoords(3, 3, 0, 13, 13, 1);
-                case SOUTH -> PipeConnectorShape.fromBlockCoords(3, 3, 15, 13, 13, 16);
-                case EAST -> PipeConnectorShape.fromBlockCoords(15, 3, 3, 16, 13, 13);
-                case WEST -> PipeConnectorShape.fromBlockCoords(0, 3, 3, 1, 13, 13);
-                case UP -> PipeConnectorShape.fromBlockCoords(3, 15, 3, 13, 16, 13);
-                case DOWN -> PipeConnectorShape.fromBlockCoords(3, 0, 3, 13, 1, 13);
+                case NORTH -> PipeConnectorShape.fromBlockCoords(dir, 3, 3, 0, 13, 13, 1);
+                case SOUTH -> PipeConnectorShape.fromBlockCoords(dir, 3, 3, 15, 13, 13, 16);
+                case EAST -> PipeConnectorShape.fromBlockCoords(dir, 15, 3, 3, 16, 13, 13);
+                case WEST -> PipeConnectorShape.fromBlockCoords(dir, 0, 3, 3, 1, 13, 13);
+                case UP -> PipeConnectorShape.fromBlockCoords(dir, 3, 15, 3, 13, 16, 13);
+                case DOWN -> PipeConnectorShape.fromBlockCoords(dir, 3, 0, 3, 13, 1, 13);
             });
         }
         return result;
@@ -152,18 +144,13 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
             }
         }
         var pos = new Vec3d(8 - (size.x/2), 8 - (size.y/2), 8 - (size.z/2));
-        return PipeConnectorShape.fromBlockCoords(pos.x, pos.y, pos.z, pos.x + size.x, pos.y + size.y, pos.z + size.z);
+        return PipeConnectorShape.fromBlockCoords(null, pos.x, pos.y, pos.z, pos.x + size.x, pos.y + size.y, pos.z + size.z);
     }
 
     public static List<PipeShapeBase> getPipeShapes(PipeShapeContext ctx) {
         var connections = ctx.getConnectionsFor(ctx.getPipeType());
         if (!connections.isEmpty()) {
-            if (!isStraight(ctx)) {
-                return new ArrayList<>(connections.stream().map(dir -> of(dir, getPipeOffset(ctx, dir))).toList());
-            } else {
-                return new ArrayList<>(connections.stream().map((dir) -> Direction.from(dir.getAxis(), Direction.AxisDirection.POSITIVE))
-                        .distinct().map(dir -> ofStraight(dir, getPipeOffset(ctx, dir))).toList());
-            }
+            return new ArrayList<>(connections.stream().map(dir -> of(dir, getPipeOffset(ctx, dir))).toList());
         } else {
             var pos = getSinglePipePosition(ctx);
             return Lists.newArrayList(fromBlockCoords(null, pos.x, pos.y, pos.z, pos.x + 3, pos.y + 3, pos.z + 3));
@@ -182,19 +169,22 @@ public record PipeShape(@Nullable Direction direction, double minX, double minY,
     @Override
     public void emit(QuadEmitter emitter, PipePartModelKey key) {
         for (Direction face : Direction.values()) {
-            emitFace(emitter, key.getSprite(), key.getEndSprite(), face);
+            emitFace(emitter, key.getSprite(), key.getEndSprite(), face, key);
         }
     }
 
-    private void emitFace(QuadEmitter emitter, Sprite sprite, Sprite endSprite, Direction face) {
+    private void emitFace(QuadEmitter emitter, Sprite sprite, Sprite endSprite, Direction face, PipeShapeContext ctx) {
         var isEndFace = direction == null || face == direction.getOpposite();
         var faceSprite = isEndFace ? endSprite : sprite;
-        if (direction != null && isEndFace) {
+        if (direction != null && face == direction) {
             var axis = face.getAxis();
             var axisDir = face.getDirection();
             if ((axisDir == Direction.AxisDirection.NEGATIVE && axis.choose(minX, minY, minZ) == 0) || (axisDir == Direction.AxisDirection.POSITIVE && axis.choose(maxX, maxY, maxZ) == 1)) {
                 return;
             }
+        }
+        if (isEndFace && isStraight(ctx)) {
+            return;
         }
         switch (face) {
             case UP -> emitSingleQuad(emitter, faceSprite, isEndFace, Direction.UP, minX, 1 - maxZ, maxX, 1 - minZ, 1 - maxY);

@@ -12,11 +12,11 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
 
-public record PipeConnectorShape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) implements PipeShapeBase {
+public record PipeConnectorShape(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) implements PipeShapeBase {
     public static SpriteIdentifier CONNECTOR_SPRITE = new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier(InfinitechMod.MOD_ID, "block/pipe/connector"));
 
-    public static PipeConnectorShape fromBlockCoords(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        return new PipeConnectorShape(minX/16.0D, minY/16.0D, minZ/16.0D, maxX/16.0D, maxY/16.0D, maxZ/16.0D);
+    public static PipeConnectorShape fromBlockCoords(@Nullable Direction direction, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        return new PipeConnectorShape(direction, minX/16.0D, minY/16.0D, minZ/16.0D, maxX/16.0D, maxY/16.0D, maxZ/16.0D);
     }
 
     @Override

@@ -7,14 +7,24 @@ import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
 import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.Nullable;
@@ -56,12 +66,70 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
     }
 
     @Override
+    protected BlockState getClosestBlockState() {
+        return Blocks.GLASS.getDefaultState();
+    }
+
+    @Override
+    protected void playBreakSound() {
+        playBreakSound(Blocks.STONE.getDefaultState());
+    }
+
+    @Override
     public void onAdded(MultipartEventBus bus) {
         bus.addListener(this, NeighbourUpdateEvent.class, (event) -> {
             needsUpdate = true;
         });
         bus.addListener(this, PartTickEvent.class, (event) -> tick());
         needsUpdate = true;
+    }
+
+    @Override
+    public ActionResult onUse(PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (player.world.isClient) {
+            var pos = holder.getContainer().getMultipartPos();
+
+            var tickDelta = MinecraftClient.getInstance().getTickDelta();
+            var maxDistance = MinecraftClient.getInstance().interactionManager.getReachDistance();
+            var startPos = player.getCameraPosVec(tickDelta);
+            var lookVec = player.getRotationVec(tickDelta);
+            var endPos = startPos.add(lookVec.x * maxDistance, lookVec.y * maxDistance, lookVec.z * maxDistance);
+
+            PipeShapeBase closestHit = null;
+            double closestDist = 0;
+
+            var shapes = PipeShape.getPipeShapes(this);
+            shapes.addAll(PipeShape.getConnectorShapes(this));
+            shapes.add(PipeShape.getCenterShape(this));
+
+            for (var shape : shapes) {
+                if (shape == null) continue;
+
+                var result = shape.toVoxelShape().raycast(startPos, endPos, pos);
+
+                if (result != null) {
+                    var dist = result.getPos().distanceTo(startPos);
+
+                    if (closestHit == null || dist < closestDist) {
+                        closestHit = shape;
+                        closestDist = dist;
+                    }
+                }
+            }
+
+            if (closestHit != null) {
+                if (closestHit instanceof PipeShape pipe) {
+                    player.sendMessage(new LiteralText("Hit " + getPipeType().name().toLowerCase() + " pipe: " + pipe.direction().getName()), false);
+                } else if (closestHit instanceof PipeConnectorShape connector) {
+                    if (connector.direction() != null) {
+                        player.sendMessage(new LiteralText("Hit connector: " + connector.direction().getName()), false);
+                    } else {
+                        player.sendMessage(new LiteralText("Hit center"), false);
+                    }
+                }
+            }
+        }
+        return ActionResult.PASS;
     }
 
     public void tick() {

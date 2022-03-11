@@ -34,6 +34,7 @@ public abstract class AbstractIOPipePart extends AbstractPipePart {
 
     @Override
     public ActionResult onUse(PlayerEntity player, Hand hand, BlockHitResult hit) {
+        super.onUse(player, hand, hit);
         if (!player.world.isClient) {
             switch (this.mode) {
                 case INSERT: this.mode = Mode.EXTRACT; break;
