@@ -11,6 +11,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -166,4 +167,10 @@ public class EnergyPipePart extends AbstractIOPipePart {
             }
         }
     }
+
+    @Override
+    public Text getDisplayName() {
+        return Text.of("Energy Pipe");
+    }
+
 }

@@ -55,6 +55,7 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
     protected Set<Direction> connectedSides;
     protected Hashtable<Direction, AbstractPipePart> pipeConnections;
     protected Hashtable<Direction, PipeConnectionContext> connections;
+    public Direction lastDirection;
     private boolean needsUpdate;
 
     public AbstractPipePart(PartDefinition definition, MultipartHolder holder) {
@@ -62,6 +63,7 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         this.connectedSides = new HashSet<>();
         this.pipeConnections = new Hashtable<>();
         this.connections = new Hashtable<>();
+        this.lastDirection = Direction.DOWN;
     }
 
     public void createFromNbt(PartDefinition definition, MultipartHolder holder, NbtCompound nbt) {
@@ -134,17 +136,23 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
                     player.sendMessage(new LiteralText("Hit " + getPipeType().name().toLowerCase() + " pipe: " + pipe.direction().getName()), false);
                 } else if (closestHit instanceof PipeConnectorShape connector) {
                     if (connector.direction() != null) {
-                        player.sendMessage(new LiteralText("Hit connector: " + connector.direction().getName()), false);
-                        player.openHandledScreen(this);
+                        // The player just right-clicked a connector.
+
+                        // player.sendMessage(new LiteralText("Hit connector: " + connector.direction().getName()), false);
+
+                        // Save which connector it was
+                        this.lastDirection = connector.direction();
 
                         // Tell the server we need to open a screen!!!
                         PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                         passedData.writeBlockPos(pos);
                         passedData.writeLong(holder.getUniqueId());
+                        passedData.writeEnumConstant(connector.direction());
                         ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.OPEN_PIPE_SCREEN_PACKET_ID, passedData);
 
                         return ActionResult.SUCCESS;
                     } else {
+                        // We hit one of the center points...
                         player.sendMessage(new LiteralText("Hit center"), false);
                     }
                 }
@@ -157,18 +165,13 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
     public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
         var container = holder.getContainer();
         var pos = container.getMultipartPos();
-        return new PipeGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(container.getMultipartWorld(), pos), pos);
+        return new PipeGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(container.getMultipartWorld(), pos), pos, holder.getUniqueId());
     }
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
         buf.writeBlockPos(holder.getContainer().getMultipartPos());
-        // TODO: also pass in the id!
-    }
-
-    @Override
-    public Text getDisplayName() {
-        return Text.of("I am a pipe lol  ?? w");
+        buf.writeLong(holder.getUniqueId());
     }
 
     public void tick() {

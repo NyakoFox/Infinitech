@@ -15,6 +15,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
@@ -79,5 +80,10 @@ public class ItemPipePart extends AbstractStoragePipePart<ItemVariant> {
     @Override
     public ItemStack getPickStack() {
         return InfinitechMod.ITEM_PIPE_ITEM.getDefaultStack();
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return Text.of("Item Pipe");
     }
 }

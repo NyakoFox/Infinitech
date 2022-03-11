@@ -16,6 +16,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 
@@ -80,5 +81,10 @@ public class FluidPipePart extends AbstractStoragePipePart<FluidVariant> {
     @Override
     public ItemStack getPickStack() {
         return InfinitechMod.FLUID_PIPE_ITEM.getDefaultStack();
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return Text.of("Fluid Pipe");
     }
 }

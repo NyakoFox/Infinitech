@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block.pipe;
 
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
+import gay.nyako.infinitech.block.MachineUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralText;
@@ -20,7 +21,7 @@ public abstract class AbstractIOPipePart extends AbstractPipePart {
     @Override
     public void createFromNbt(PartDefinition definition, MultipartHolder holder, NbtCompound nbt) {
         if (nbt.contains("IOMode")) {
-            var mode = Mode.valueOf(nbt.getString("IOMode"));
+            mode = Mode.valueOf(nbt.getString("IOMode"));
         }
         super.createFromNbt(definition, holder, nbt);
     }
@@ -32,18 +33,9 @@ public abstract class AbstractIOPipePart extends AbstractPipePart {
         return nbt;
     }
 
-    @Override
-    public ActionResult onUse(PlayerEntity player, Hand hand, BlockHitResult hit) {
-        super.onUse(player, hand, hit);
-        if (!player.world.isClient) {
-            switch (this.mode) {
-                case INSERT: this.mode = Mode.EXTRACT; break;
-                case EXTRACT: this.mode = Mode.INSERT; break;
-            }
-            player.sendMessage(new LiteralText("Switched mode: " + mode), true);
-        }
-        updateConnections();
-        return ActionResult.SUCCESS;
+    public Mode nextMode() {
+        // Yikes
+        return Mode.values()[(mode.ordinal() + 1) % Mode.values().length];
     }
 
     public enum Mode {

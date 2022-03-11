@@ -53,10 +53,13 @@ import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.minecraft.world.explosion.Explosion;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,7 +114,7 @@ public class InfinitechMod implements ModInitializer {
 
 	public static final ScreenHandlerType<EnergyInfuserGuiDescription> ENERGY_INFUSER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"energy_infuser_gui_description"), (syncId, inventory, buf) -> new EnergyInfuserGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
-	public static final ScreenHandlerType<PipeGuiDescription> PIPE_GUI_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"pipe_gui_description"), (syncId, inventory, buf) -> new PipeGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos()));
+	public static final ScreenHandlerType<PipeGuiDescription> PIPE_GUI_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"pipe_gui_description"), (syncId, inventory, buf) -> new PipeGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos(), buf.readLong()));
 
 	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
 
@@ -163,6 +166,8 @@ public class InfinitechMod implements ModInitializer {
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
 
 	public static final Identifier OPEN_PIPE_SCREEN_PACKET_ID = new Identifier(MOD_ID, "open_pipe_screen");
+
+	public static final Identifier SWITCH_PIPE_MODE_PACKET_ID = new Identifier(MOD_ID, "switch_pipe_mode");
 
 	public static FlowableFluid STILL_LIQUID_XP;
 	public static FlowableFluid FLOWING_LIQUID_XP;
@@ -272,7 +277,7 @@ public class InfinitechMod implements ModInitializer {
 			BlockPos blockPos = attachedData.readBlockPos();
 			packetContext.getTaskQueue().execute(() -> {
 				// Execute on the main thread
-				if(!packetContext.getPlayer().world.isOutOfHeightLimit(blockPos)){
+				if(!packetContext.getPlayer().world.isOutOfHeightLimit(blockPos)) {
 					if (packetContext.getPlayer().world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
 						blockEntity.sides.put(side,side_id);
 						blockEntity.sync();
@@ -284,14 +289,37 @@ public class InfinitechMod implements ModInitializer {
 		ServerSidePacketRegistry.INSTANCE.register(OPEN_PIPE_SCREEN_PACKET_ID, (packetContext, attachedData) -> {
 			BlockPos blockPos = attachedData.readBlockPos();
 			long uniqueId = attachedData.readLong();
+			var lastDirection = attachedData.readEnumConstant(Direction.class);
+
+			var world = packetContext.getPlayer().world;
+			packetContext.getTaskQueue().execute(() -> {
+				// Execute on the main thread
+				if(!world.isOutOfHeightLimit(blockPos)) {
+					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+						var container = multipartBlockEntity.getContainer();
+						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+							pipePart.lastDirection = lastDirection;
+							packetContext.getPlayer().openHandledScreen(pipePart);
+						}
+					}
+				}
+			});
+		});
+
+		ServerSidePacketRegistry.INSTANCE.register(SWITCH_PIPE_MODE_PACKET_ID, (packetContext, attachedData) -> {
+			AbstractIOPipePart.Mode mode = attachedData.readEnumConstant(AbstractIOPipePart.Mode.class);
+			BlockPos blockPos = attachedData.readBlockPos();
+			long uniqueId = attachedData.readLong();
+
+			var world = packetContext.getPlayer().world;
 
 			packetContext.getTaskQueue().execute(() -> {
 				// Execute on the main thread
-				if(!packetContext.getPlayer().world.isOutOfHeightLimit(blockPos)){
-					if (packetContext.getPlayer().world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+				if(!world.isOutOfHeightLimit(blockPos)) {
+					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
 						var container = multipartBlockEntity.getContainer();
-						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
-							packetContext.getPlayer().openHandledScreen(pipePart);
+						if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
+							pipePart.mode = mode;
 						}
 					}
 				}
