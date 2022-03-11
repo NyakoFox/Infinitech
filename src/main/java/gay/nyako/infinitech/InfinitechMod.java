@@ -111,6 +111,8 @@ public class InfinitechMod implements ModInitializer {
 
 	public static final ScreenHandlerType<EnergyInfuserGuiDescription> ENERGY_INFUSER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"energy_infuser_gui_description"), (syncId, inventory, buf) -> new EnergyInfuserGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, getPacketBlockEntity(inventory, buf.readBlockPos())));
 
+	public static final ScreenHandlerType<PipeGuiDescription> PIPE_GUI_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"pipe_gui_description"), (syncId, inventory, buf) -> new PipeGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos()));
+
 	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
 
 	public static final Block FURNACE_GENERATOR_BLOCK = new FurnaceGeneratorBlock(FabricBlockSettings
@@ -159,6 +161,8 @@ public class InfinitechMod implements ModInitializer {
 	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
+
+	public static final Identifier OPEN_PIPE_SCREEN_PACKET_ID = new Identifier(MOD_ID, "open_pipe_screen");
 
 	public static FlowableFluid STILL_LIQUID_XP;
 	public static FlowableFluid FLOWING_LIQUID_XP;
@@ -272,6 +276,23 @@ public class InfinitechMod implements ModInitializer {
 					if (packetContext.getPlayer().world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
 						blockEntity.sides.put(side,side_id);
 						blockEntity.sync();
+					}
+				}
+			});
+		});
+
+		ServerSidePacketRegistry.INSTANCE.register(OPEN_PIPE_SCREEN_PACKET_ID, (packetContext, attachedData) -> {
+			BlockPos blockPos = attachedData.readBlockPos();
+			long uniqueId = attachedData.readLong();
+
+			packetContext.getTaskQueue().execute(() -> {
+				// Execute on the main thread
+				if(!packetContext.getPlayer().world.isOutOfHeightLimit(blockPos)){
+					if (packetContext.getPlayer().world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+						var container = multipartBlockEntity.getContainer();
+						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+							packetContext.getPlayer().openHandledScreen(pipePart);
+						}
 					}
 				}
 			});

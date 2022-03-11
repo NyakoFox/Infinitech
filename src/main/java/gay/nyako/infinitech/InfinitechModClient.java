@@ -9,8 +9,10 @@ import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserScreen;
 import gay.nyako.infinitech.block.fluid_tank.FluidTankRenderer;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorGuiDescription;
 import gay.nyako.infinitech.block.furnace_generator.FurnaceGeneratorScreen;
+import gay.nyako.infinitech.block.pipe.PipeGuiDescription;
 import gay.nyako.infinitech.block.pipe.PipePartModelBaker;
 import gay.nyako.infinitech.block.pipe.PipePartModelKey;
+import gay.nyako.infinitech.block.pipe.PipeScreen;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
 import gay.nyako.infinitech.block.power_bank.PowerBankScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -38,6 +40,7 @@ public class InfinitechModClient implements ClientModInitializer {
         ScreenRegistry.<PowerBankGuiDescription, PowerBankScreen>register(InfinitechMod.POWER_BANK_SCREEN_HANDLER, (gui, inventory, title) -> new PowerBankScreen(gui, inventory.player, title));
         ScreenRegistry.<BlockBreakerGuiDescription, BlockBreakerScreen>register(InfinitechMod.BLOCK_BREAKER_SCREEN_HANDLER, (gui, inventory, title) -> new BlockBreakerScreen(gui, inventory.player, title));
         ScreenRegistry.<EnergyInfuserGuiDescription, EnergyInfuserScreen>register(InfinitechMod.ENERGY_INFUSER_SCREEN_HANDLER, (gui, inventory, title) -> new EnergyInfuserScreen(gui, inventory.player, title));
+        ScreenRegistry.<PipeGuiDescription, PipeScreen>register(InfinitechMod.PIPE_GUI_SCREEN_HANDLER, (gui, inventory, title) -> new PipeScreen(gui, inventory.player, title));
 
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.FLUID_TANK_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(InfinitechMod.ITEM_GRATE_BLOCK, RenderLayer.getCutout());

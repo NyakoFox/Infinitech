@@ -7,17 +7,29 @@ import alexiil.mc.lib.multipart.api.render.PartModelKey;
 import alexiil.mc.lib.net.*;
 import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
+import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -31,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class AbstractPipePart extends AbstractPart implements PipeShapeContext {
+public abstract class AbstractPipePart extends AbstractPart implements PipeShapeContext, ExtendedScreenHandlerFactory {
     public static final ParentNetIdSingle<AbstractPipePart> NET_PIPE;
     public static final NetIdDataK<AbstractPipePart> CONNECTION_DATA;
 
@@ -123,6 +135,15 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
                 } else if (closestHit instanceof PipeConnectorShape connector) {
                     if (connector.direction() != null) {
                         player.sendMessage(new LiteralText("Hit connector: " + connector.direction().getName()), false);
+                        player.openHandledScreen(this);
+
+                        // Tell the server we need to open a screen!!!
+                        PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+                        passedData.writeBlockPos(pos);
+                        passedData.writeLong(holder.getUniqueId());
+                        ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.OPEN_PIPE_SCREEN_PACKET_ID, passedData);
+
+                        return ActionResult.SUCCESS;
                     } else {
                         player.sendMessage(new LiteralText("Hit center"), false);
                     }
@@ -130,6 +151,24 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
             }
         }
         return ActionResult.PASS;
+    }
+
+    @Override
+    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+        var container = holder.getContainer();
+        var pos = container.getMultipartPos();
+        return new PipeGuiDescription(syncId, playerInventory, ScreenHandlerContext.create(container.getMultipartWorld(), pos), pos);
+    }
+
+    @Override
+    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+        buf.writeBlockPos(holder.getContainer().getMultipartPos());
+        // TODO: also pass in the id!
+    }
+
+    @Override
+    public Text getDisplayName() {
+        return Text.of("I am a pipe lol  ?? w");
     }
 
     public void tick() {
