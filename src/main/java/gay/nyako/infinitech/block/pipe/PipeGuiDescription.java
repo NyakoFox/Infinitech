@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 public class PipeGuiDescription extends SyncedGuiDescription {
+    public Direction direction;
 
     public PipeGuiDescription(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, BlockPos blockPos, long uniqueId) {
         super(InfinitechMod.PIPE_GUI_SCREEN_HANDLER, syncId, playerInventory);
@@ -34,6 +35,8 @@ public class PipeGuiDescription extends SyncedGuiDescription {
         MultipartBlockEntity multipartBlockEntity = (MultipartBlockEntity) world.getBlockEntity(blockPos);
         AbstractPipePart mainPipe = (AbstractPipePart) multipartBlockEntity.getContainer().getPart(uniqueId);
         WTabPanel tabs = new WTabPanel();
+
+        this.direction = mainPipe.lastDirection;
 
         var container = multipartBlockEntity.getContainer();
         var parts = container.getAllParts();
@@ -44,7 +47,7 @@ public class PipeGuiDescription extends SyncedGuiDescription {
                 ioPipePart = (AbstractIOPipePart) pipePart;
             }
 
-            if (!pipePart.getConnectedSides().contains(mainPipe.lastDirection)) continue;
+            if (!pipePart.getConnectedSides().contains(direction)) continue;
 
             WPlainPanel testPanel = new WPlainPanel();
 
@@ -55,16 +58,17 @@ public class PipeGuiDescription extends SyncedGuiDescription {
             testPanel.add(new WLabel(pipePart.getDisplayName()), 0, 0);
 
             if (ioPipePart != null) {
-                WButton button = new WButton(Text.of("Current mode: " + ioPipePart.mode.toString()));
+                WButton button = new WButton(Text.of("Current mode: " + ioPipePart.getMode(direction)));
                 AbstractIOPipePart finalIoPipePart = ioPipePart;
                 button.setOnClick(() -> {
                     // This code runs on the client when you click the button.
-                    AbstractIOPipePart.Mode nextMode = finalIoPipePart.nextMode();
-                    finalIoPipePart.mode = nextMode;
+                    AbstractIOPipePart.Mode nextMode = finalIoPipePart.nextMode(direction);
+                    finalIoPipePart.setMode(direction, nextMode);
                     button.setLabel(Text.of("Current mode: " + nextMode.toString()));
 
                     PacketByteBuf packet = new PacketByteBuf(Unpooled.buffer());
                     packet.writeEnumConstant(nextMode);
+                    packet.writeEnumConstant(direction);
                     packet.writeBlockPos(blockPos);
                     packet.writeLong(abstractPart.holder.getUniqueId());
                     ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.SWITCH_PIPE_MODE_PACKET_ID, packet);

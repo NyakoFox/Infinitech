@@ -30,6 +30,7 @@ public abstract class AbstractStoragePipePart<T> extends AbstractIOPipePart {
             checked.add(holder.getContainer().getMultipartPos().offset(ignoreSide));
         }
         return getNetworkConnections(checked).stream()
+                .filter((ctx) -> ((AbstractIOPipePart)ctx.pipe()).getMode(ctx.direction()).isInsert())
                 .map((ctx) -> ctx.lookup(getLookup()))
                 .filter((storage) -> storage != null && storage.supportsInsertion()).toList();
     }
@@ -37,41 +38,44 @@ public abstract class AbstractStoragePipePart<T> extends AbstractIOPipePart {
     @Override
     public void tick() {
         super.tick();
-        if (!holder.getContainer().isClientWorld() && mode == Mode.EXTRACT) {
-            var connections = getConnections();
-            var ignorePositions = new HashSet<BlockPos>();
-            for (PipeConnectionContext context : connections) {
-                ignorePositions.add(context.pos());
-            }
-            for (PipeConnectionContext context : connections) {
-                var storage = context.lookup(getLookup());
-                var ownStorage = getStorage(context.direction());
-                if (storage.supportsExtraction()) {
-                    try (Transaction transaction = Transaction.openOuter()) {
-                        var toExtract = getTransferRate();
-                        for (StorageView<T> view : storage.iterable(transaction)) {
-                            if (!view.isResourceBlank()) {
-                                var resource = view.getResource();
 
-                                long extracted;
-                                try (Transaction testExtraction = transaction.openNested()) {
-                                    extracted = view.extract(resource, toExtract, testExtraction);
-                                }
+        if (holder.getContainer().isClientWorld()) return;
 
-                                if (extracted > 0) {
-                                    long inserted = ownStorage.insert(resource, extracted, transaction);
+        var connections = getConnections();
+        var ignorePositions = new HashSet<BlockPos>();
+        for (PipeConnectionContext context : connections) {
+            ignorePositions.add(context.pos());
+        }
+        for (PipeConnectionContext context : connections) {
+            if (!getMode(context.direction()).isExtract()) continue;
 
-                                    if (inserted > 0) {
-                                        view.extract(resource, inserted, transaction);
-                                        transaction.commit();
+            var storage = context.lookup(getLookup());
+            var ownStorage = getStorage(context.direction());
+            if (storage.supportsExtraction()) {
+                try (Transaction transaction = Transaction.openOuter()) {
+                    var toExtract = getTransferRate();
+                    for (StorageView<T> view : storage.iterable(transaction)) {
+                        if (!view.isResourceBlank()) {
+                            var resource = view.getResource();
 
-                                        toExtract -= inserted;
-                                        if (toExtract == 0) {
-                                            break;
-                                        }
-                                    } else {
-                                        transaction.abort();
+                            long extracted;
+                            try (Transaction testExtraction = transaction.openNested()) {
+                                extracted = view.extract(resource, toExtract, testExtraction);
+                            }
+
+                            if (extracted > 0) {
+                                long inserted = ownStorage.insert(resource, extracted, transaction);
+
+                                if (inserted > 0) {
+                                    view.extract(resource, inserted, transaction);
+                                    transaction.commit();
+
+                                    toExtract -= inserted;
+                                    if (toExtract == 0) {
+                                        break;
                                     }
+                                } else {
+                                    transaction.abort();
                                 }
                             }
                         }

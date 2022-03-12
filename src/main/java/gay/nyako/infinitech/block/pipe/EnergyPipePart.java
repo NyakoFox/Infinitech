@@ -60,6 +60,7 @@ public class EnergyPipePart extends AbstractIOPipePart {
             checked.add(holder.getContainer().getMultipartPos().offset(ignoreSide));
         }
         return getNetworkConnections(checked).stream()
+                .filter((ctx) -> ((AbstractIOPipePart)ctx.pipe()).getMode(ctx.direction()).isInsert())
                 .map((ctx) -> ctx.lookup(EnergyStorage.SIDED))
                 .filter((storage) -> storage != null && storage.supportsInsertion()).toList();
     }
@@ -77,9 +78,11 @@ public class EnergyPipePart extends AbstractIOPipePart {
                 holder.getContainer().redrawIfChanged();
             }
         }
-        if (!client && mode == Mode.EXTRACT) {
+        if (!client) {
             var connections = getConnections();
             for (PipeConnectionContext context : connections) {
+                if (!getMode(context.direction()).isExtract()) continue;
+
                 var storage = context.lookup(EnergyStorage.SIDED);
                 var ownStorage = EnergyPipeStorage.of(this, context.direction());
                 if (storage.supportsExtraction()) {

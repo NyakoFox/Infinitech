@@ -308,6 +308,7 @@ public class InfinitechMod implements ModInitializer {
 
 		ServerSidePacketRegistry.INSTANCE.register(SWITCH_PIPE_MODE_PACKET_ID, (packetContext, attachedData) -> {
 			AbstractIOPipePart.Mode mode = attachedData.readEnumConstant(AbstractIOPipePart.Mode.class);
+			Direction direction = attachedData.readEnumConstant(Direction.class);
 			BlockPos blockPos = attachedData.readBlockPos();
 			long uniqueId = attachedData.readLong();
 
@@ -319,7 +320,7 @@ public class InfinitechMod implements ModInitializer {
 					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
 						var container = multipartBlockEntity.getContainer();
 						if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
-							pipePart.mode = mode;
+							pipePart.setMode(direction, mode);
 						}
 					}
 				}
