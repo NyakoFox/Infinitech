@@ -1,5 +1,6 @@
 package gay.nyako.infinitech;
 
+import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
@@ -33,6 +34,7 @@ import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItemStorage;
 import gay.nyako.infinitech.storage.fluid.SidedFluidStorage;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -53,7 +55,9 @@ import net.minecraft.item.*;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.tag.ItemTags;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -163,11 +167,15 @@ public class InfinitechMod implements ModInitializer {
 	public static final PartDefinition ENERGY_PIPE_PART = new PartDefinition(new Identifier(MOD_ID, "energy_pipe"), EnergyPipePart::new, EnergyPipePart::new);
 	public static final Item ENERGY_PIPE_ITEM = new PipePartItem(new FabricItemSettings().group(ItemGroup.MISC), h -> new EnergyPipePart(ENERGY_PIPE_PART, h));
 
+	public static final Item WRENCH_ITEM = new Item(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
+
 	public static final Identifier SIDE_CHOICE_UI_PACKET_ID = new Identifier(MOD_ID, "side_choice_ui");
 
 	public static final Identifier OPEN_PIPE_SCREEN_PACKET_ID = new Identifier(MOD_ID, "open_pipe_screen");
 
 	public static final Identifier SWITCH_PIPE_MODE_PACKET_ID = new Identifier(MOD_ID, "switch_pipe_mode");
+
+	public static final Identifier TOGGLE_PIPE_SIDE_PACKET_ID = new Identifier(MOD_ID, "toggle_pipe_side");
 
 	public static FlowableFluid STILL_LIQUID_XP;
 	public static FlowableFluid FLOWING_LIQUID_XP;
@@ -229,6 +237,8 @@ public class InfinitechMod implements ModInitializer {
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "energy_pipe"), ENERGY_PIPE_ITEM);
 		ENERGY_PIPE_PART.register();
+
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "wrench"), WRENCH_ITEM);
 
 		ItemStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof MultipartBlockEntity multipartBE) {
@@ -321,6 +331,45 @@ public class InfinitechMod implements ModInitializer {
 						var container = multipartBlockEntity.getContainer();
 						if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
 							pipePart.setMode(direction, mode);
+						}
+					}
+				}
+			});
+		});
+
+		ServerSidePacketRegistry.INSTANCE.register(TOGGLE_PIPE_SIDE_PACKET_ID, (packetContext, attachedData) -> {
+			BlockPos blockPos = attachedData.readBlockPos();
+			long uniqueId = attachedData.readLong();
+			var direction = attachedData.readEnumConstant(Direction.class);
+			var value = attachedData.readBoolean();
+
+			var world = packetContext.getPlayer().world;
+
+			packetContext.getTaskQueue().execute(() -> {
+				// Execute on the main thread
+				if(!world.isOutOfHeightLimit(blockPos)) {
+					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+						var container = multipartBlockEntity.getContainer();
+						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+							pipePart.enabledSides.put(direction, value);
+							pipePart.needsUpdate = true;
+
+							world.markDirty(blockPos);
+
+							var neighborPos = blockPos.offset(direction);
+							if (!world.isOutOfHeightLimit(neighborPos) && world.getBlockEntity(neighborPos) instanceof MultipartBlockEntity neighborBlockEntity) {
+								var neighborContainer = neighborBlockEntity.getContainer();
+
+								AbstractPart neighborPart;
+								if ((neighborPart = neighborContainer.getFirstPart(part -> part instanceof AbstractPipePart && pipePart.isValidPipe((AbstractPipePart)part, direction))) != null) {
+									var neighborPipe = (AbstractPipePart)neighborPart;
+
+									neighborPipe.enabledSides.put(direction.getOpposite(), value);
+									neighborPipe.needsUpdate = true;
+
+									world.markDirty(neighborPos);
+								}
+							}
 						}
 					}
 				}
