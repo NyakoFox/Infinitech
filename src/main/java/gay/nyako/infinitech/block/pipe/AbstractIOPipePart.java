@@ -5,17 +5,10 @@ import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.net.IMsgReadCtx;
 import alexiil.mc.lib.net.IMsgWriteCtx;
 import alexiil.mc.lib.net.NetByteBuf;
-import gay.nyako.infinitech.block.MachineUtil;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public abstract class AbstractIOPipePart extends AbstractPipePart {
     public HashMap<Direction, Mode> modeMap;

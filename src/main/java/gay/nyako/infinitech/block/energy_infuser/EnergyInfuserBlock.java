@@ -30,6 +30,15 @@ public class EnergyInfuserBlock extends BlockWithEntity {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
+    public boolean isSideInvisible(BlockState state, BlockState stateFrom, Direction direction) {
+        if (stateFrom.isOf(this)) {
+            return true;
+        }
+        return super.isSideInvisible(state, stateFrom, direction);
+    }
+
+    @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return checkType(type, InfinitechMod.ENERGY_INFUSER_BLOCK_ENTITY, EnergyInfuserBlockEntity::tick);
@@ -72,7 +81,6 @@ public class EnergyInfuserBlock extends BlockWithEntity {
     public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos) {
         return true;
     }
-
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {

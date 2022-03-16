@@ -182,6 +182,10 @@ public class InfinitechMod implements ModInitializer {
 	public static Item LIQUID_XP_BUCKET;
 	public static Block LIQUID_XP;
 
+	public static FlowableFluid STILL_MILK;
+	public static FlowableFluid FLOWING_MILK;
+	public static Block MILK;
+
 	public static final Item STAFF_OF_ENDER = new StaffOfEnderItem(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
 
 	public static AbstractMachineBlockEntity getPacketBlockEntity(PlayerInventory playerInventory, BlockPos blockPos) {
@@ -382,6 +386,10 @@ public class InfinitechMod implements ModInitializer {
 				new BucketItem(STILL_LIQUID_XP, new Item.Settings().recipeRemainder(Items.BUCKET).maxCount(1)));
 
 		LIQUID_XP = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "liquid_xp"), new FluidBlock(STILL_LIQUID_XP, FabricBlockSettings.copy(Blocks.WATER).luminance(state -> 15)){});
+
+		STILL_MILK = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "milk"), new MilkFluid.Still());
+		FLOWING_MILK = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "flowing_milk"), new MilkFluid.Flowing());
+		MILK = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "milk"), new FluidBlock(STILL_MILK, FabricBlockSettings.copy(Blocks.WATER)){});
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "staff_of_ender"), STAFF_OF_ENDER);
 	}

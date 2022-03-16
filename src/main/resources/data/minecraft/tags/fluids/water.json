@@ -1,8 +1,10 @@
 {
-  "replace": false,
-  "values":
-  [
-    "infinitech:liquid_xp",
-    "infinitech:flowing_liquid_xp"
-  ]
+    "replace": false,
+    "values":
+    [
+        "infinitech:liquid_xp",
+        "infinitech:flowing_liquid_xp",
+        "infinitech:milk",
+        "infinitech:flowing_milk"
+    ]
 }
