@@ -43,7 +43,10 @@ import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
@@ -272,6 +275,8 @@ public class InfinitechMod implements ModInitializer {
 			}
 			return null;
 		});
+		FluidStorage.ITEM.registerForItems((itemStack, context) ->
+				new FullItemFluidStorage(context, full -> ItemVariant.of(Items.BUCKET), FluidVariant.of(STILL_MILK), FluidConstants.BUCKET), Items.MILK_BUCKET);
 
 		EnergyStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof AbstractMachineBlockEntity machine) {

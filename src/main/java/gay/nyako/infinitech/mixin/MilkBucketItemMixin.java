@@ -1,11 +1,13 @@
 package gay.nyako.infinitech.mixin;
 
 import gay.nyako.infinitech.InfinitechMod;
+import net.fabricmc.fabric.mixin.transfer.BucketItemAccessor;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FlowableFluid;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
 import net.minecraft.particle.ParticleTypes;
@@ -32,10 +34,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MilkBucketItem.class)
-public abstract class MilkBucketItemMixin extends Item implements FluidModificationItem {
+public abstract class MilkBucketItemMixin extends Item implements FluidModificationItem, BucketItemAccessor {
 
     public MilkBucketItemMixin(Settings settings) {
         super(settings);
+    }
+
+    @Override
+    public Fluid fabric_getFluid() {
+        return InfinitechMod.STILL_MILK;
     }
 
     @Inject(cancellable = true, method = "use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;", at = @At("HEAD"))
