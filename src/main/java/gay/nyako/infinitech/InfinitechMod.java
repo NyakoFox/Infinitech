@@ -28,6 +28,8 @@ import gay.nyako.infinitech.block.power_bank.PowerBankBlock;
 import gay.nyako.infinitech.block.power_bank.PowerBankBlockEntity;
 import gay.nyako.infinitech.block.power_bank.PowerBankGuiDescription;
 import gay.nyako.infinitech.block.xp_drain.XPDrainBlock;
+import gay.nyako.infinitech.item.ItemFilterGuiDescription;
+import gay.nyako.infinitech.item.ItemFilterItem;
 import gay.nyako.infinitech.item.StaffOfEnderItem;
 import gay.nyako.infinitech.storage.fluid.FluidInventory;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
@@ -123,6 +125,8 @@ public class InfinitechMod implements ModInitializer {
 
 	public static final ScreenHandlerType<PipeGuiDescription> PIPE_GUI_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"pipe_gui_description"), (syncId, inventory, buf) -> new PipeGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY, buf.readBlockPos(), buf.readLong()));
 
+	public static final ScreenHandlerType<ItemFilterGuiDescription> ITEM_FILTER_SCREEN_HANDLER = ScreenHandlerRegistry.registerExtended(new Identifier(MOD_ID,"item_filter_gui_description"), (syncId, inventory, buf) -> new ItemFilterGuiDescription(syncId, inventory, ScreenHandlerContext.EMPTY));
+
 	public static BlockEntityType<ConveyorBeltBlockEntity> CONVEYOR_BELT_BLOCK_ENTITY;
 
 	public static final Block FURNACE_GENERATOR_BLOCK = new FurnaceGeneratorBlock(FabricBlockSettings
@@ -190,6 +194,7 @@ public class InfinitechMod implements ModInitializer {
 	public static Block MILK;
 
 	public static final Item STAFF_OF_ENDER = new StaffOfEnderItem(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
+	public static final Item ITEM_FILTER = new ItemFilterItem(new FabricItemSettings().group(ItemGroup.MISC));
 
 	public static AbstractMachineBlockEntity getPacketBlockEntity(PlayerInventory playerInventory, BlockPos blockPos) {
 		return (AbstractMachineBlockEntity) playerInventory.player.world.getBlockEntity(blockPos);
@@ -397,6 +402,7 @@ public class InfinitechMod implements ModInitializer {
 		MILK = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "milk"), new FluidBlock(STILL_MILK, FabricBlockSettings.copy(Blocks.WATER)){});
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "staff_of_ender"), STAFF_OF_ENDER);
+		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_filter"), ITEM_FILTER);
 	}
 
 	public static void log(Level level, String message) {
