@@ -193,6 +193,7 @@ public class InfinitechMod implements ModInitializer {
 	public void onInitialize() { // modid is "infinitech"
 		log(Level.INFO, "hi from infinitech!!");
 
+		Milk.finiteMilkFluid();
 		Milk.enableMilkFluid();
 		Milk.enableMilkPlacing();
 		Milk.enableCauldron();
