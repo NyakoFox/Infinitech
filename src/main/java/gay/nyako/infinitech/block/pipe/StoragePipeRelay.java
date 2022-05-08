@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.util.math.Direction;
-
+import java.util.List;
 import java.util.Map;
 
 public class StoragePipeRelay<T> extends SnapshotParticipant<Integer> implements SingleSlotStorage<T> {

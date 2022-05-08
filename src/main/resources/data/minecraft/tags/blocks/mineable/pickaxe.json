@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "infinitech:conveyor_belt",
+    "infinitech:item_grate",
+    "infinitech:block_breaker",
+    "infinitech:energy_infuser",
+    "infinitech:xp_drain",
+    "infinitech:furnace_generator",
+    "infinitech:power_bank",
+    "infinitech:cardboard_box",
+    "infinitech:fluid_tank"
+  ]
+}

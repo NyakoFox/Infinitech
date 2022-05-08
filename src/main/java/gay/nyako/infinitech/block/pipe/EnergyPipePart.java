@@ -1,12 +1,15 @@
 package gay.nyako.infinitech.block.pipe;
 
+import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.MultipartHolder;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
+import alexiil.mc.lib.multipart.impl.PartContainer;
 import alexiil.mc.lib.net.*;
 import gay.nyako.infinitech.InfinitechMod;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
@@ -15,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 

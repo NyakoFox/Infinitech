@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block.pipe;
 
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
+import alexiil.mc.lib.multipart.impl.PartContainer;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.MachineUtil;
@@ -14,6 +15,7 @@ import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.icon.ItemIcon;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;

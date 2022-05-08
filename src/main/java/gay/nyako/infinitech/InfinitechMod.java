@@ -3,6 +3,7 @@ package gay.nyako.infinitech;
 import alexiil.mc.lib.multipart.api.AbstractPart;
 import alexiil.mc.lib.multipart.api.PartDefinition;
 import alexiil.mc.lib.multipart.impl.MultipartBlockEntity;
+import alexiil.mc.lib.multipart.impl.PartContainer;
 import gay.nyako.infinitech.block.AbstractMachineBlockEntity;
 import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserBlock;
 import gay.nyako.infinitech.block.MachineUtil;
@@ -35,6 +36,7 @@ import gay.nyako.infinitech.storage.fluid.FluidInventory;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItem;
 import gay.nyako.infinitech.storage.fluid.FluidStoringBlockItemStorage;
 import gay.nyako.infinitech.storage.fluid.SidedFluidStorage;
+import io.github.tropheusj.milk.Milk;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -42,7 +44,6 @@ import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
-import net.fabricmc.fabric.api.tool.attribute.v1.FabricToolTags;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -68,6 +69,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -82,31 +84,26 @@ public class InfinitechMod implements ModInitializer {
 	public static final Block CONVEYOR_BELT_BLOCK = new ConveyorBeltBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static final Block ITEM_GRATE_BLOCK = new ItemGrateBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static final Block BLOCK_BREAKER_BLOCK = new BlockBreakerBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static final Block ENERGY_INFUSER_BLOCK = new EnergyInfuserBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static final Block XP_DRAIN_BLOCK = new XPDrainBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static BlockEntityType<ItemGrateBlockEntity> ITEM_GRATE_BLOCK_ENTITY;
@@ -133,7 +130,6 @@ public class InfinitechMod implements ModInitializer {
 			.of(Material.METAL)
 			.strength(4.0f)
 			.luminance(FurnaceGeneratorBlock.getLuminance())
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static BlockEntityType<FurnaceGeneratorBlockEntity> FURNACE_GENERATOR_BLOCK_ENTITY;
@@ -141,7 +137,6 @@ public class InfinitechMod implements ModInitializer {
 	public static final Block POWER_BANK_BLOCK = new PowerBankBlock(FabricBlockSettings
 			.of(Material.METAL)
 			.strength(4.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 
 	public static BlockEntityType<PowerBankBlockEntity> POWER_BANK_BLOCK_ENTITY;
@@ -150,7 +145,6 @@ public class InfinitechMod implements ModInitializer {
 			.of(Material.WOOD)
 			.sounds(BlockSoundGroup.WOOD)
 			.strength(2.0f)
-			.breakByTool(FabricToolTags.AXES, 1)
 	);
 
 	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
@@ -160,7 +154,6 @@ public class InfinitechMod implements ModInitializer {
 			.nonOpaque()
 			.luminance(FluidTankBlock::getLuminance)
 			.strength(2.0f)
-			.breakByTool(FabricToolTags.PICKAXES, 1)
 	);
 	public static final BlockItem FLUID_TANK_BLOCK_ITEM = new FluidTankBlockItem(FLUID_TANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC));
 	public static BlockEntityType<FluidTankBlockEntity> FLUID_TANK_BLOCK_ENTITY;
@@ -189,10 +182,6 @@ public class InfinitechMod implements ModInitializer {
 	public static Item LIQUID_XP_BUCKET;
 	public static Block LIQUID_XP;
 
-	public static FlowableFluid STILL_MILK;
-	public static FlowableFluid FLOWING_MILK;
-	public static Block MILK;
-
 	public static final Item STAFF_OF_ENDER = new StaffOfEnderItem(new FabricItemSettings().group(ItemGroup.MISC).maxCount(1));
 	public static final Item ITEM_FILTER = new ItemFilterItem(new FabricItemSettings().group(ItemGroup.MISC));
 
@@ -203,6 +192,11 @@ public class InfinitechMod implements ModInitializer {
 	@Override
 	public void onInitialize() { // modid is "infinitech"
 		log(Level.INFO, "hi from infinitech!!");
+
+		Milk.enableMilkFluid();
+		Milk.enableMilkPlacing();
+		Milk.enableCauldron();
+		Milk.enableAllMilkBottles();
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "conveyor_belt"), CONVEYOR_BELT_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "conveyor_belt"), new BlockItem(CONVEYOR_BELT_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
@@ -222,7 +216,7 @@ public class InfinitechMod implements ModInitializer {
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "cardboard_box"), CARDBOARD_BOX_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "cardboard_box"), new BlockItem(CARDBOARD_BOX_BLOCK, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
-		FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
+		//FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
 		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "cardboard_box_entity"), FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK);
@@ -280,8 +274,6 @@ public class InfinitechMod implements ModInitializer {
 			}
 			return null;
 		});
-		FluidStorage.ITEM.registerForItems((itemStack, context) ->
-				new FullItemFluidStorage(context, full -> ItemVariant.of(Items.BUCKET), FluidVariant.of(STILL_MILK), FluidConstants.BUCKET), Items.MILK_BUCKET);
 
 		EnergyStorage.SIDED.registerFallback((world, pos, state, blockEntity, side) -> {
 			if (blockEntity instanceof AbstractMachineBlockEntity machine) {
@@ -396,10 +388,6 @@ public class InfinitechMod implements ModInitializer {
 				new BucketItem(STILL_LIQUID_XP, new Item.Settings().recipeRemainder(Items.BUCKET).maxCount(1)));
 
 		LIQUID_XP = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "liquid_xp"), new FluidBlock(STILL_LIQUID_XP, FabricBlockSettings.copy(Blocks.WATER).luminance(state -> 15)){});
-
-		STILL_MILK = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "milk"), new MilkFluid.Still());
-		FLOWING_MILK = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "flowing_milk"), new MilkFluid.Flowing());
-		MILK = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "milk"), new FluidBlock(STILL_MILK, FabricBlockSettings.copy(Blocks.WATER)){});
 
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "staff_of_ender"), STAFF_OF_ENDER);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "item_filter"), ITEM_FILTER);

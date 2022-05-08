@@ -3,8 +3,6 @@
     "values":
     [
         "infinitech:liquid_xp",
-        "infinitech:flowing_liquid_xp",
-        "infinitech:milk",
-        "infinitech:flowing_milk"
+        "infinitech:flowing_liquid_xp"
     ]
 }

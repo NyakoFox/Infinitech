@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '0.11-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -31,6 +31,11 @@ repositories {
 		name = "CottonMC"
 		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
+	maven {
+		url = "https://mvn.devos.one/snapshots/"
+	}
+
+	maven { url = "https://api.modrinth.com/maven" }
 }
 
 dependencies {
@@ -52,6 +57,8 @@ dependencies {
 	modApi include("teamreborn:energy:${project.energy_version}") {
 		exclude(group: "net.fabricmc.fabric-api", module: "fabric-networking-blockentity-v0")
 	}
+	modImplementation(include("io.github.tropheusj:milk-lib:0.3.1"))
+
 }
 
 processResources {

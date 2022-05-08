@@ -2,6 +2,7 @@ package gay.nyako.infinitech.block.pipe;
 
 import alexiil.mc.lib.multipart.api.render.PartModelBaker;
 import alexiil.mc.lib.multipart.api.render.PartRenderContext;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 
 public class PipePartModelBaker implements PartModelBaker<PipePartModelKey> {
     @Override

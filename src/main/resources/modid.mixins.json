@@ -4,8 +4,7 @@
     "package": "gay.nyako.infinitech.mixin",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
-        "ExperienceBottleEntityMixin",
-        "MilkBucketItemMixin"
+
     ],
     "client": [],
     "injectors": {

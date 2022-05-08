@@ -1,7 +1,7 @@
 package gay.nyako.infinitech.storage.fluid;
 
 import net.minecraft.item.ItemStack;
-
+import net.minecraft.nbt.NbtCompound;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

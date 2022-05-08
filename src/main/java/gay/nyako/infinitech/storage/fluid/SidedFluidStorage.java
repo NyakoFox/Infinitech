@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

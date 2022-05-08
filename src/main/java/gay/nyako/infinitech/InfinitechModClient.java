@@ -86,14 +86,5 @@ public class InfinitechModClient implements ClientModInitializer {
             registry.register(new Identifier("infinitech:block/liquid_xp_still"));
             registry.register(new Identifier("infinitech:block/liquid_xp_flowing"));
         });
-
-        // Milk
-        FluidRenderHandlerRegistry.INSTANCE.register(InfinitechMod.STILL_MILK, InfinitechMod.FLOWING_MILK, new SimpleFluidRenderHandler(
-                new Identifier("minecraft:block/water_still"),
-                new Identifier("minecraft:block/water_flow"),
-                0xFFFFFF
-        ));
-
-        BlockRenderLayerMap.INSTANCE.putFluids(RenderLayer.getTranslucent(), InfinitechMod.STILL_MILK, InfinitechMod.FLOWING_MILK);
     }
 }
