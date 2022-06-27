@@ -16,13 +16,13 @@ import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.icon.ItemIcon;
 import io.netty.buffer.Unpooled;
 import java.util.List;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -73,7 +73,7 @@ public class PipeGuiDescription extends SyncedGuiDescription {
                     packet.writeEnumConstant(direction);
                     packet.writeBlockPos(blockPos);
                     packet.writeLong(abstractPart.holder.getUniqueId());
-                    ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.SWITCH_PIPE_MODE_PACKET_ID, packet);
+                    ClientPlayNetworking.send(InfinitechMod.SWITCH_PIPE_MODE_PACKET_ID, packet);
                 });
                 testPanel.add(button, 0, 12, 140, 16);
             }

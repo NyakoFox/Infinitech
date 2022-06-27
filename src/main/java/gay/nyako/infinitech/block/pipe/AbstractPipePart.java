@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import gay.nyako.infinitech.InfinitechMod;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -31,9 +31,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -123,7 +121,7 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         passedData.writeLong(holder.getUniqueId());
         passedData.writeEnumConstant(direction);
         passedData.writeBoolean(value);
-        ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.TOGGLE_PIPE_SIDE_PACKET_ID, passedData);
+        ClientPlayNetworking.send(InfinitechMod.TOGGLE_PIPE_SIDE_PACKET_ID, passedData);
     }
 
     @Override
@@ -250,7 +248,7 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
                             passedData.writeBlockPos(pos);
                             passedData.writeLong(holder.getUniqueId());
                             passedData.writeEnumConstant(connector.direction());
-                            ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.OPEN_PIPE_SCREEN_PACKET_ID, passedData);
+                            ClientPlayNetworking.send(InfinitechMod.OPEN_PIPE_SCREEN_PACKET_ID, passedData);
                         } else {
                             // Wrenching connector, should we even do this?
 

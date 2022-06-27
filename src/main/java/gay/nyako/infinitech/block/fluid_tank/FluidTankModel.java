@@ -25,6 +25,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.util.math.random.Random;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;

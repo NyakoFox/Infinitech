@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.impl.client.indigo.renderer.helper.ColorHelper;
 import net.fabricmc.fabric.impl.renderer.RendererAccessImpl;
 import net.minecraft.client.MinecraftClient;
@@ -74,9 +75,12 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         matrices.push();
 
         var handler = FluidVariantRendering.getHandlerOrDefault(variant.getFluid());
-        var sprite = handler.getSprite(variant);
+
+        var sprites = handler.getSprites(variant);
+        var sprite = sprites[0]; // Um?
+
         var color = handler.getColor(variant, view, pos);
-        var flipped = handler.fillsFromTop(variant);
+        var flipped = FluidVariantAttributes.isLighterThanAir(variant);
         var luminance = variant.getFluid().getDefaultState().getBlockState().getLuminance();
 
         var renderer = RendererAccessImpl.INSTANCE.getRenderer();

@@ -7,7 +7,7 @@ import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
@@ -77,7 +77,7 @@ public class WSideButton extends WWidget {
         packet.writeEnumConstant(side);
         packet.writeEnumConstant(side_id);
         packet.writeBlockPos(blockPos);
-        ClientSidePacketRegistry.INSTANCE.sendToServer(InfinitechMod.SIDE_CHOICE_UI_PACKET_ID, packet);
+        ClientPlayNetworking.send(InfinitechMod.SIDE_CHOICE_UI_PACKET_ID, packet);
 
         return InputResult.PROCESSED;
     }

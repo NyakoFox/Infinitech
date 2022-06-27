@@ -22,7 +22,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.SimpleFluidRenderHandler;
-import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
@@ -35,8 +35,8 @@ import net.minecraft.util.Identifier;
 public class InfinitechModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        BlockEntityRendererRegistry.INSTANCE.register(InfinitechMod.CONVEYOR_BELT_BLOCK_ENTITY, ConveyorBeltBlockEntityRenderer::new);
-        BlockEntityRendererRegistry.INSTANCE.register(InfinitechMod.FLUID_TANK_BLOCK_ENTITY, ctx -> new FluidTankRenderer());
+        BlockEntityRendererRegistry.register(InfinitechMod.CONVEYOR_BELT_BLOCK_ENTITY, ConveyorBeltBlockEntityRenderer::new);
+        BlockEntityRendererRegistry.register(InfinitechMod.FLUID_TANK_BLOCK_ENTITY, ctx -> new FluidTankRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(InfinitechMod.FLUID_TANK_BLOCK_ITEM, new FluidTankRenderer());
         ScreenRegistry.<FurnaceGeneratorGuiDescription, FurnaceGeneratorScreen>register(InfinitechMod.FURNACE_GENERATOR_SCREEN_HANDLER, (gui, inventory, title) -> new FurnaceGeneratorScreen(gui, inventory.player, title));
         ScreenRegistry.<PowerBankGuiDescription, PowerBankScreen>register(InfinitechMod.POWER_BANK_SCREEN_HANDLER, (gui, inventory, title) -> new PowerBankScreen(gui, inventory.player, title));

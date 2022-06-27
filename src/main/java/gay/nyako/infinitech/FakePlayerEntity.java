@@ -13,11 +13,11 @@ public class FakePlayerEntity extends PlayerEntity {
     public static final GameProfile profile = new GameProfile(uuid, name);
 
     public FakePlayerEntity(World world, BlockPos pos) {
-        super(world, pos, 0.0f, profile);
+        super(world, pos, 0.0f, profile, null);
     }
 
     public FakePlayerEntity(World world) {
-        super(world, BlockPos.ORIGIN, 0.0f, profile);
+        super(world, BlockPos.ORIGIN, 0.0f, profile, null);
     }
 
     @Override

@@ -22,7 +22,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -97,12 +97,12 @@ public class FurnaceGeneratorBlockEntity extends AbstractGeneratorBlockEntity im
     }
 
     protected Text getContainerName() {
-        return new TranslatableText("container.furnace");
+        return Text.translatable("container.furnace");
     }
 
     @Override
     public Text getDisplayName() {
-        return new TranslatableText(getCachedState().getBlock().getTranslationKey());
+        return Text.translatable(getCachedState().getBlock().getTranslationKey());
     }
 
     public static Map<Item, Integer> createFuelTimeMap() {

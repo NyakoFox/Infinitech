@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.11-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -57,7 +57,7 @@ dependencies {
 	modApi include("teamreborn:energy:${project.energy_version}") {
 		exclude(group: "net.fabricmc.fabric-api", module: "fabric-networking-blockentity-v0")
 	}
-	modImplementation(include("io.github.tropheusj:milk-lib:0.3.2"))
+	modImplementation(include("io.github.tropheusj:milk-lib:1.0.48"))
 
 }
 

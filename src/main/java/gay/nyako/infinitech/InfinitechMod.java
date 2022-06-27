@@ -10,8 +10,6 @@ import gay.nyako.infinitech.block.MachineUtil;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlock;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerBlockEntity;
 import gay.nyako.infinitech.block.block_breaker.BlockBreakerGuiDescription;
-import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlock;
-import gay.nyako.infinitech.block.cardboard_box.CardboardBoxBlockEntity;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlock;
 import gay.nyako.infinitech.block.conveyor.ConveyorBeltBlockEntity;
 import gay.nyako.infinitech.block.energy_infuser.EnergyInfuserBlockEntity;
@@ -40,7 +38,7 @@ import io.github.tropheusj.milk.Milk;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
@@ -141,14 +139,6 @@ public class InfinitechMod implements ModInitializer {
 
 	public static BlockEntityType<PowerBankBlockEntity> POWER_BANK_BLOCK_ENTITY;
 
-	public static final Block CARDBOARD_BOX_BLOCK = new CardboardBoxBlock(FabricBlockSettings
-			.of(Material.WOOD)
-			.sounds(BlockSoundGroup.WOOD)
-			.strength(2.0f)
-	);
-
-	public static BlockEntityType<CardboardBoxBlockEntity> CARDBOARD_BOX_BLOCK_ENTITY;
-
 	public static final FluidTankBlock FLUID_TANK_BLOCK = new FluidTankBlock(FluidConstants.BUCKET * 16, FabricBlockSettings
 			.of(Material.GLASS)
 			.nonOpaque()
@@ -214,11 +204,6 @@ public class InfinitechMod implements ModInitializer {
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "power_bank"), POWER_BANK_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "power_bank"), new BlockItem(POWER_BANK_BLOCK, new FabricItemSettings().group(ItemGroup.MISC)));
 		POWER_BANK_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "power_bank_entity"), FabricBlockEntityTypeBuilder.create(PowerBankBlockEntity::new, POWER_BANK_BLOCK).build(null));
-
-		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "cardboard_box"), CARDBOARD_BOX_BLOCK);
-		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "cardboard_box"), new BlockItem(CARDBOARD_BOX_BLOCK, new FabricItemSettings().group(ItemGroup.DECORATIONS)));
-		//FlammableBlockRegistry.getDefaultInstance().add(CARDBOARD_BOX_BLOCK, 5, 5);
-		CARDBOARD_BOX_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "cardboard_box_entity"), FabricBlockEntityTypeBuilder.create(CardboardBoxBlockEntity::new, CARDBOARD_BOX_BLOCK).build(null));
 
 		Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK);
 		Registry.register(Registry.ITEM, new Identifier(MOD_ID, "fluid_tank"), FLUID_TANK_BLOCK_ITEM);
@@ -288,100 +273,92 @@ public class InfinitechMod implements ModInitializer {
 			return null;
 		});
 
-		ServerSidePacketRegistry.INSTANCE.register(SIDE_CHOICE_UI_PACKET_ID, (packetContext, attachedData) -> {
-			MachineUtil.Sides side = attachedData.readEnumConstant(MachineUtil.Sides.class);
-			MachineUtil.SideTypes side_id = attachedData.readEnumConstant(MachineUtil.SideTypes.class);
-			BlockPos blockPos = attachedData.readBlockPos();
-			packetContext.getTaskQueue().execute(() -> {
-				// Execute on the main thread
-				if(!packetContext.getPlayer().world.isOutOfHeightLimit(blockPos)) {
-					if (packetContext.getPlayer().world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
-						blockEntity.sides.put(side,side_id);
-						blockEntity.sync();
-					}
-				}
-			});
-		});
+		ServerPlayNetworking.registerGlobalReceiver(SIDE_CHOICE_UI_PACKET_ID,
+				(server, player, handler, buffer, sender) -> server.execute(() -> {
+					MachineUtil.Sides side = buffer.readEnumConstant(MachineUtil.Sides.class);
+					MachineUtil.SideTypes side_id = buffer.readEnumConstant(MachineUtil.SideTypes.class);
+					BlockPos blockPos = buffer.readBlockPos();
+					if(!player.world.isOutOfHeightLimit(blockPos)) {
+						if (player.world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
+							blockEntity.sides.put(side,side_id);
+							blockEntity.sync();
+						}
+					};
+				})
+		);
 
-		ServerSidePacketRegistry.INSTANCE.register(OPEN_PIPE_SCREEN_PACKET_ID, (packetContext, attachedData) -> {
-			BlockPos blockPos = attachedData.readBlockPos();
-			long uniqueId = attachedData.readLong();
-			var lastDirection = attachedData.readEnumConstant(Direction.class);
-
-			var world = packetContext.getPlayer().world;
-			packetContext.getTaskQueue().execute(() -> {
-				// Execute on the main thread
-				if(!world.isOutOfHeightLimit(blockPos)) {
-					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-						var container = multipartBlockEntity.getContainer();
-						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
-							pipePart.lastDirection = lastDirection;
-							packetContext.getPlayer().openHandledScreen(pipePart);
+		ServerPlayNetworking.registerGlobalReceiver(OPEN_PIPE_SCREEN_PACKET_ID,
+				(server, player, handler, buffer, sender) -> server.execute(() -> {
+					BlockPos blockPos = buffer.readBlockPos();
+					long uniqueId = buffer.readLong();
+					var lastDirection = buffer.readEnumConstant(Direction.class);
+					if (!player.world.isOutOfHeightLimit(blockPos)) {
+						if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+							var container = multipartBlockEntity.getContainer();
+							if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+								pipePart.lastDirection = lastDirection;
+								player.openHandledScreen(pipePart);
+							}
 						}
 					}
-				}
-			});
-		});
+				})
+		);
 
-		ServerSidePacketRegistry.INSTANCE.register(SWITCH_PIPE_MODE_PACKET_ID, (packetContext, attachedData) -> {
-			AbstractIOPipePart.Mode mode = attachedData.readEnumConstant(AbstractIOPipePart.Mode.class);
-			Direction direction = attachedData.readEnumConstant(Direction.class);
-			BlockPos blockPos = attachedData.readBlockPos();
-			long uniqueId = attachedData.readLong();
+		ServerPlayNetworking.registerGlobalReceiver(SWITCH_PIPE_MODE_PACKET_ID,
+				(server, player, handler, buffer, sender) -> server.execute(() -> {
+					AbstractIOPipePart.Mode mode = buffer.readEnumConstant(AbstractIOPipePart.Mode.class);
+					Direction direction = buffer.readEnumConstant(Direction.class);
+					BlockPos blockPos = buffer.readBlockPos();
+					long uniqueId = buffer.readLong();
 
-			var world = packetContext.getPlayer().world;
-
-			packetContext.getTaskQueue().execute(() -> {
-				// Execute on the main thread
-				if(!world.isOutOfHeightLimit(blockPos)) {
-					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-						var container = multipartBlockEntity.getContainer();
-						if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
-							pipePart.setMode(direction, mode);
+					if(!player.world.isOutOfHeightLimit(blockPos)) {
+						if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+							var container = multipartBlockEntity.getContainer();
+							if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
+								pipePart.setMode(direction, mode);
+							}
 						}
 					}
-				}
-			});
-		});
+				})
+		);
 
-		ServerSidePacketRegistry.INSTANCE.register(TOGGLE_PIPE_SIDE_PACKET_ID, (packetContext, attachedData) -> {
-			BlockPos blockPos = attachedData.readBlockPos();
-			long uniqueId = attachedData.readLong();
-			var direction = attachedData.readEnumConstant(Direction.class);
-			var value = attachedData.readBoolean();
+		ServerPlayNetworking.registerGlobalReceiver(TOGGLE_PIPE_SIDE_PACKET_ID,
+				(server, player, handler, buffer, sender) -> server.execute(() -> {
+					BlockPos blockPos = buffer.readBlockPos();
+					long uniqueId = buffer.readLong();
+					var direction = buffer.readEnumConstant(Direction.class);
+					var value = buffer.readBoolean();
 
-			var world = packetContext.getPlayer().world;
+					var world = player.world;
 
-			packetContext.getTaskQueue().execute(() -> {
-				// Execute on the main thread
-				if(!world.isOutOfHeightLimit(blockPos)) {
-					if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-						var container = multipartBlockEntity.getContainer();
-						if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
-							pipePart.enabledSides.put(direction, value);
-							pipePart.needsUpdate = true;
+					if(!world.isOutOfHeightLimit(blockPos)) {
+						if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+							var container = multipartBlockEntity.getContainer();
+							if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+								pipePart.enabledSides.put(direction, value);
+								pipePart.needsUpdate = true;
 
-							world.markDirty(blockPos);
+								world.markDirty(blockPos);
 
-							var neighborPos = blockPos.offset(direction);
-							if (!world.isOutOfHeightLimit(neighborPos) && world.getBlockEntity(neighborPos) instanceof MultipartBlockEntity neighborBlockEntity) {
-								var neighborContainer = neighborBlockEntity.getContainer();
+								var neighborPos = blockPos.offset(direction);
+								if (!world.isOutOfHeightLimit(neighborPos) && world.getBlockEntity(neighborPos) instanceof MultipartBlockEntity neighborBlockEntity) {
+									var neighborContainer = neighborBlockEntity.getContainer();
 
-								AbstractPart neighborPart;
-								if ((neighborPart = neighborContainer.getFirstPart(part -> part instanceof AbstractPipePart && pipePart.isValidPipe((AbstractPipePart)part, direction))) != null) {
-									var neighborPipe = (AbstractPipePart)neighborPart;
+									AbstractPart neighborPart;
+									if ((neighborPart = neighborContainer.getFirstPart(part -> part instanceof AbstractPipePart && pipePart.isValidPipe((AbstractPipePart)part, direction))) != null) {
+										var neighborPipe = (AbstractPipePart)neighborPart;
 
-									neighborPipe.enabledSides.put(direction.getOpposite(), value);
-									neighborPipe.needsUpdate = true;
+										neighborPipe.enabledSides.put(direction.getOpposite(), value);
+										neighborPipe.needsUpdate = true;
 
-									world.markDirty(neighborPos);
+										world.markDirty(neighborPos);
+									}
 								}
 							}
 						}
 					}
-				}
-			});
-		});
+				})
+		);
 
 		STILL_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "liquid_xp"), new LiquidXPFluid.Still());
 		FLOWING_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "flowing_liquid_xp"), new LiquidXPFluid.Flowing());

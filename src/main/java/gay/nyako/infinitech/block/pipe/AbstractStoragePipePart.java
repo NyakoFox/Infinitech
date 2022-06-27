@@ -11,6 +11,7 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractStoragePipePart<T> extends AbstractIOPipePart {
@@ -54,7 +55,10 @@ public abstract class AbstractStoragePipePart<T> extends AbstractIOPipePart {
             if (storage.supportsExtraction()) {
                 try (Transaction transaction = Transaction.openOuter()) {
                     var toExtract = getTransferRate();
-                    for (StorageView<T> view : storage.iterable(transaction)) {
+
+                    var iterator = storage.iterator();
+                    while (iterator.hasNext()) {
+                        var view = iterator.next();
                         if (!view.isResourceBlank()) {
                             var resource = view.getResource();
 

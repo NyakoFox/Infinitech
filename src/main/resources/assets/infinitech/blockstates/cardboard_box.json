@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "infinitech:block/cardboard_box", "y": 180 },
-	"facing=east":  { "model": "infinitech:block/cardboard_box", "y": 270 },
-	"facing=south": { "model": "infinitech:block/cardboard_box", "y":   0 },
-	"facing=west":  { "model": "infinitech:block/cardboard_box", "y":  90 }
-  }
-}
