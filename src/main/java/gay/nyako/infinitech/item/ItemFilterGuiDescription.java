@@ -1,13 +1,11 @@
 package gay.nyako.infinitech.item;
 
 import gay.nyako.infinitech.InfinitechMod;
-import gay.nyako.infinitech.WEnergyBar;
 import io.github.cottonmc.cotton.gui.SyncedGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.text.Text;
 
 public class ItemFilterGuiDescription extends SyncedGuiDescription {
 
