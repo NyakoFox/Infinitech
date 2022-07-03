@@ -2,8 +2,8 @@ package gay.nyako.infinitech.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -14,20 +14,17 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
-public abstract class FilterItem<T> extends Item implements ExtendedScreenHandlerFactory {
+public abstract class FilterItem<T extends TransferVariant> extends Item implements ExtendedScreenHandlerFactory {
 
     private static final String ITEMS_KEY = "Items";
     private static final int FILTER_SLOTS = 9;
 
     public FilterItem(FabricItemSettings settings) {
         super(settings);
-        inventory = new ArrayList<T>();
     }
 
     public boolean accepts(ItemStack stack, T resource) {
@@ -35,32 +32,32 @@ public abstract class FilterItem<T> extends Item implements ExtendedScreenHandle
         return true;
     }
 
+    public abstract T getResourceFromNBT(NbtCompound nbt);
+
     public ArrayList<T> getFilterInventory(ItemStack stack) {
         NbtCompound nbtCompound = stack.getOrCreateNbt();
         if (!nbtCompound.contains(ITEMS_KEY)) {
             nbtCompound.put(ITEMS_KEY, new NbtList());
         }
 
+        ArrayList<T> items = new ArrayList<>();
+
         NbtList nbtList = nbtCompound.getList(ITEMS_KEY, NbtList.COMPOUND_TYPE);
         for (NbtElement element : nbtList) {
-            ItemStack item = ItemStack.fromNbt((NbtCompound) element);
+            items.add(getResourceFromNBT((NbtCompound) element));
         }
 
-        if (optional.isPresent()) {
-            NbtCompound nbtCompound2 = optional.get();
-            ItemStack itemStack = ItemStack.fromNbt(nbtCompound2);
-            itemStack.increment(k);
-            itemStack.writeNbt(nbtCompound2);
-            nbtList.remove(nbtCompound2);
-            nbtList.add(0, nbtCompound2);
-        } else {
-            ItemStack itemStack2 = stack.copy();
-            itemStack2.setCount(k);
-            NbtCompound nbtCompound3 = new NbtCompound();
-            itemStack2.writeNbt(nbtCompound3);
-            nbtList.add(0, nbtCompound3);
+        return items;
+    }
+
+    public void addResource(ItemStack stack, T resource) {
+        NbtCompound nbtCompound = stack.getOrCreateNbt();
+        if (!nbtCompound.contains(ITEMS_KEY)) {
+            nbtCompound.put(ITEMS_KEY, new NbtList());
         }
-        return k;
+
+        NbtList nbtList = nbtCompound.getList(ITEMS_KEY, NbtList.COMPOUND_TYPE);
+        nbtList.add(resource.toNbt());
     }
 
     @Override
