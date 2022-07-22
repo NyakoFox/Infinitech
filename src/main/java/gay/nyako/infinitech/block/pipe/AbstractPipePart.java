@@ -81,13 +81,19 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         if (nbt.contains("DisabledSides")) {
             var list = nbt.getList("DisabledSides", NbtElement.STRING_TYPE);
             for (var dirStr : list) {
-                enabledSides.put(Direction.byName(dirStr.asString()), false);
+                var dir = Direction.byName(dirStr.asString());
+                if (dir != null) {
+                    enabledSides.put(dir, false);
+                }
             }
         }
         if (nbt.contains("Connections")) {
             var list = nbt.getList("Connections", NbtElement.STRING_TYPE);
             for (var dirStr : list) {
-                connectedSides.add(Direction.byName(dirStr.asString()));
+                var dir = Direction.byName(dirStr.asString());
+                if (dir != null) {
+                    connectedSides.add(dir);
+                }
             }
         }
     }
@@ -502,14 +508,14 @@ public abstract class AbstractPipePart extends AbstractPart implements PipeShape
         var list = new NbtList();
         for (var dir : Direction.values()) {
             if (!enabledSides.get(dir)) {
-                list.add(NbtString.of(dir.name()));
+                list.add(NbtString.of(dir.getName()));
             }
         }
         nbt.put("DisabledSides", list);
 
         var list2 = new NbtList();
         for (var dir : connectedSides) {
-            list2.add(NbtString.of(dir.name()));
+            list2.add(NbtString.of(dir.getName()));
         }
         nbt.put("Connections", list2);
 

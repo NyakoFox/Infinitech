@@ -26,8 +26,8 @@ public abstract class AbstractIOPipePart extends AbstractPipePart {
         var modes = nbt.getCompound("IOModes");
         if (modes != null) {
             for (var dir : Direction.values()) {
-                if (modes.contains(dir.name())) {
-                    modeMap.put(dir, Mode.valueOf(modes.getString(dir.name())));
+                if (modes.contains(dir.getName())) {
+                    modeMap.put(dir, Mode.valueOf(modes.getString(dir.getName())));
                 }
             }
         }
@@ -47,7 +47,7 @@ public abstract class AbstractIOPipePart extends AbstractPipePart {
         var nbt = super.toTag();
         var modes = new NbtCompound();
         for (var dir : Direction.values()) {
-            modes.putString(dir.name(), modeMap.get(dir).name());
+            modes.putString(dir.getName(), modeMap.get(dir).name());
         }
         nbt.put("IOModes", modes);
         return nbt;

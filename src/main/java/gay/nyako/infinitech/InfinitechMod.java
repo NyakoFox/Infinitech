@@ -320,6 +320,8 @@ public class InfinitechMod implements ModInitializer {
 								var container = multipartBlockEntity.getContainer();
 								if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
 									pipePart.setMode(direction, mode);
+
+									player.world.markDirty(blockPos);
 								}
 							}
 						}
