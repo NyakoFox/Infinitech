@@ -372,7 +372,7 @@ public class InfinitechMod implements ModInitializer {
 		STILL_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "liquid_xp"), new LiquidXPFluid.Still());
 		FLOWING_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "flowing_liquid_xp"), new LiquidXPFluid.Flowing());
 		LIQUID_XP_BUCKET = Registry.register(Registry.ITEM, new Identifier(MOD_ID, "liquid_xp_bucket"),
-				new BucketItem(STILL_LIQUID_XP, new Item.Settings().recipeRemainder(Items.BUCKET).maxCount(1)));
+				new BucketItem(STILL_LIQUID_XP, new Item.Settings().recipeRemainder(Items.BUCKET).group(ItemGroup.MISC).maxCount(1)));
 
 		LIQUID_XP = Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "liquid_xp"), new FluidBlock(STILL_LIQUID_XP, FabricBlockSettings.copy(Blocks.WATER).luminance(state -> 15)){});
 
