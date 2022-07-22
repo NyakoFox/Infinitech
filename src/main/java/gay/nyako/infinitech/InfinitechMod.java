@@ -274,90 +274,97 @@ public class InfinitechMod implements ModInitializer {
 		});
 
 		ServerPlayNetworking.registerGlobalReceiver(SIDE_CHOICE_UI_PACKET_ID,
-				(server, player, handler, buffer, sender) -> server.execute(() -> {
+				(server, player, handler, buffer, sender) -> {
 					MachineUtil.Sides side = buffer.readEnumConstant(MachineUtil.Sides.class);
 					MachineUtil.SideTypes side_id = buffer.readEnumConstant(MachineUtil.SideTypes.class);
 					BlockPos blockPos = buffer.readBlockPos();
-					if(!player.world.isOutOfHeightLimit(blockPos)) {
-						if (player.world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
-							blockEntity.sides.put(side,side_id);
-							blockEntity.sync();
-						}
-					};
-				})
+					server.execute(() -> {
+						if(!player.world.isOutOfHeightLimit(blockPos)) {
+							if (player.world.getBlockEntity(blockPos) instanceof AbstractMachineBlockEntity blockEntity) {
+								blockEntity.sides.put(side,side_id);
+								blockEntity.sync();
+							}
+						};
+					});
+				}
 		);
 
 		ServerPlayNetworking.registerGlobalReceiver(OPEN_PIPE_SCREEN_PACKET_ID,
-				(server, player, handler, buffer, sender) -> server.execute(() -> {
+				(server, player, handler, buffer, sender) -> {
 					BlockPos blockPos = buffer.readBlockPos();
 					long uniqueId = buffer.readLong();
 					var lastDirection = buffer.readEnumConstant(Direction.class);
-					if (!player.world.isOutOfHeightLimit(blockPos)) {
-						if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-							var container = multipartBlockEntity.getContainer();
-							if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
-								pipePart.lastDirection = lastDirection;
-								player.openHandledScreen(pipePart);
+					server.execute(() -> {
+						if (!player.world.isOutOfHeightLimit(blockPos)) {
+							if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+								var container = multipartBlockEntity.getContainer();
+								if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+									pipePart.lastDirection = lastDirection;
+									player.openHandledScreen(pipePart);
+								}
 							}
 						}
-					}
-				})
+					});
+				}
 		);
 
 		ServerPlayNetworking.registerGlobalReceiver(SWITCH_PIPE_MODE_PACKET_ID,
-				(server, player, handler, buffer, sender) -> server.execute(() -> {
+				(server, player, handler, buffer, sender) -> {
 					AbstractIOPipePart.Mode mode = buffer.readEnumConstant(AbstractIOPipePart.Mode.class);
 					Direction direction = buffer.readEnumConstant(Direction.class);
 					BlockPos blockPos = buffer.readBlockPos();
 					long uniqueId = buffer.readLong();
-
-					if(!player.world.isOutOfHeightLimit(blockPos)) {
-						if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-							var container = multipartBlockEntity.getContainer();
-							if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
-								pipePart.setMode(direction, mode);
+					server.execute(() -> {
+						if(!player.world.isOutOfHeightLimit(blockPos)) {
+							if (player.world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+								var container = multipartBlockEntity.getContainer();
+								if (container.getPart(uniqueId) instanceof AbstractIOPipePart pipePart) {
+									pipePart.setMode(direction, mode);
+								}
 							}
 						}
-					}
-				})
+					});
+				}
 		);
 
 		ServerPlayNetworking.registerGlobalReceiver(TOGGLE_PIPE_SIDE_PACKET_ID,
-				(server, player, handler, buffer, sender) -> server.execute(() -> {
+				(server, player, handler, buffer, sender) -> {
 					BlockPos blockPos = buffer.readBlockPos();
 					long uniqueId = buffer.readLong();
 					var direction = buffer.readEnumConstant(Direction.class);
 					var value = buffer.readBoolean();
+					server.execute(() -> {
 
-					var world = player.world;
+						var world = player.world;
 
-					if(!world.isOutOfHeightLimit(blockPos)) {
-						if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
-							var container = multipartBlockEntity.getContainer();
-							if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
-								pipePart.enabledSides.put(direction, value);
-								pipePart.needsUpdate = true;
+						if(!world.isOutOfHeightLimit(blockPos)) {
+							if (world.getBlockEntity(blockPos) instanceof MultipartBlockEntity multipartBlockEntity) {
+								var container = multipartBlockEntity.getContainer();
+								if (container.getPart(uniqueId) instanceof AbstractPipePart pipePart) {
+									pipePart.enabledSides.put(direction, value);
+									pipePart.needsUpdate = true;
 
-								world.markDirty(blockPos);
+									world.markDirty(blockPos);
 
-								var neighborPos = blockPos.offset(direction);
-								if (!world.isOutOfHeightLimit(neighborPos) && world.getBlockEntity(neighborPos) instanceof MultipartBlockEntity neighborBlockEntity) {
-									var neighborContainer = neighborBlockEntity.getContainer();
+									var neighborPos = blockPos.offset(direction);
+									if (!world.isOutOfHeightLimit(neighborPos) && world.getBlockEntity(neighborPos) instanceof MultipartBlockEntity neighborBlockEntity) {
+										var neighborContainer = neighborBlockEntity.getContainer();
 
-									AbstractPart neighborPart;
-									if ((neighborPart = neighborContainer.getFirstPart(part -> part instanceof AbstractPipePart && pipePart.isValidPipe((AbstractPipePart)part, direction))) != null) {
-										var neighborPipe = (AbstractPipePart)neighborPart;
+										AbstractPart neighborPart;
+										if ((neighborPart = neighborContainer.getFirstPart(part -> part instanceof AbstractPipePart && pipePart.isValidPipe((AbstractPipePart)part, direction))) != null) {
+											var neighborPipe = (AbstractPipePart)neighborPart;
 
-										neighborPipe.enabledSides.put(direction.getOpposite(), value);
-										neighborPipe.needsUpdate = true;
+											neighborPipe.enabledSides.put(direction.getOpposite(), value);
+											neighborPipe.needsUpdate = true;
 
-										world.markDirty(neighborPos);
+											world.markDirty(neighborPos);
+										}
 									}
 								}
 							}
 						}
-					}
-				})
+					});
+				}
 		);
 
 		STILL_LIQUID_XP = Registry.register(Registry.FLUID, new Identifier(MOD_ID, "liquid_xp"), new LiquidXPFluid.Still());
